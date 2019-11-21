@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>EXPRESS ADMIN TEST</title>
+        <style>
+            .paging{
+                text-align: center;
+                margin-top: 20px;
+            }
+            .page_btn{
+                display: inline-block;
+                border : 1px solid #333;
+                padding : 2px 3px;
+                cursor: pointer;
+            }
+        </style>
+        <script src="/js/jquery-3.4.1.min.js"></script>
+        <script>
+                $().ready(function(){
+                    var adminListFrm = $('#adminListFrm');
+                    $('.page_btn').on("click", function(){
+                        console.log(this);
+                        console.log($(this).hasClass('next_page'));
+                        if($(this).hasClass('next_page')){
+                            adminListFrm.append("<input type='hidden' name='offset' value='"+"<%=page*10+1%>"+"'/>");
+                            //adminListFrm.append("<input type='hidden' name='page' value='"+"<%=(page+1)%>"+"'/>");
+                            $('#listPage').val("<%=(page+1)%>");
+                        }else if($(this).hasClass('previous_page')){
+                            adminListFrm.append("<input type='hidden' name='offset' value='"+"<%=(page-1)*10%>"+"'/>");
+                            //adminListFrm.append("<input type='hidden' name='page' value='"+"<%=page-1%>"+"'/>");
+                            $('#listPage').val("<%=(page+1)%>");
+                        }else if($(this).hasClass("first_page")){
+                            adminListFrm.append("<input type='hidden' name='offset' value='1'/>");
+                            $('#listPage').val("1");
+                        }else if($(this).hasClass("last_page")){
+                            adminListFrm.append("<input type='hidden' name='offset' value='"+"<%=Math.floor((max/limit)+1)%>"+"'/>");
+                            $('#listPage').val("<%=Math.floor(((max/limit)+1)/10+1)%>");
+                        }else{
+                            adminListFrm.append("<input type='hidden' name='offset' value='"+this.innerHTML+"'/>");                        
+                        }   
+                        adminListFrm.submit();                 
+                    });
+                    $('.listLimit').on("change",function(){
+                        $('#listPage').val("1");
+                        adminListFrm.submit();
+                    });
+                })   
+        </script>
+        <script>
+            Date.prototype.format = function(f) {
+                if (!this.valueOf()) return " ";
+
+                var weekKorName = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+
+                var weekKorShortName = ["일", "월", "화", "수", "목", "금", "토"];
+
+                var weekEngName = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+                var weekEngShortName = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+                var d = this;
+
+                return f.replace(/(yyyy|yy|MM|dd|KS|KL|ES|EL|HH|hh|mm|ss|a\/p)/gi, function($1) {
+                    switch ($1) {
+                        case "yyyy":
+                            return d.getFullYear(); // 년 (4자리)
+
+                        case "yy":
+                            return (d.getFullYear() % 1000).zf(2); // 년 (2자리)
+
+                        case "MM":
+                            return (d.getMonth() + 1).zf(2); // 월 (2자리)
+
+                        case "dd":
+                            return d.getDate().zf(2); // 일 (2자리)
+
+                        case "KS":
+                            return weekKorShortName[d.getDay()]; // 요일 (짧은 한글)
+
+                        case "KL":
+                            return weekKorName[d.getDay()]; // 요일 (긴 한글)
+
+                        case "ES":
+                            return weekEngShortName[d.getDay()]; // 요일 (짧은 영어)
+
+                        case "EL":
+                            return weekEngName[d.getDay()]; // 요일 (긴 영어)
+
+                        case "HH":
+                            return d.getHours().zf(2); // 시간 (24시간 기준, 2자리)
+
+                        case "hh":
+                            return ((h = d.getHours() % 12) ? h : 12).zf(2); // 시간 (12시간 기준, 2자리)
+
+                        case "mm":
+                            return d.getMinutes().zf(2); // 분 (2자리)
+
+                        case "ss":
+                            return d.getSeconds().zf(2); // 초 (2자리)
+
+                        case "a/p":
+                            return d.getHours() < 12 ? "오전" : "오후"; // 오전/오후 구분
+
+                        default:
+                            return $1;
+                    }
+                });
+            };
+
+            String.prototype.string = function(len) {
+                var s = "",
+                    i = 0;
+                while (i++ < len) {
+                    s += this;
+                }
+                return s;
+            };
+
+            String.prototype.zf = function(len) {
+                return "0".string(len - this.length) + this;
+            };
+
+            Number.prototype.zf = function(len) {
+                return this.toString().zf(len);
+            };
+        </script>
+    </head>
+    <body>
+        <h1>INFORMATION</h1>
+        <h2>Admin List</h2>
+        <div>
+            <form id="adminListFrm" method="POST">
+                <div style="display:block;">
+                    <%if(max >0){%><span> Total <%=max%> </span><%}%>
+                    <span style="float: right;">
+                        <select name="limit" class="listLimit">
+                            <option value="10" <%=limit==10? 'selected':'' %>>10</option>
+                            <option value="25" <%=limit==25? 'selected':'' %>>25</option>
+                            <option value="50" <%=limit==50? 'selected':'' %>>50</option>
+                            <option value="100" <%=limit==100? 'selected':'' %>>100</option>
+                        </select>
+                    </span>
+                </div>
+                <table style="width:100%;">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nick Name</th>
+                            <th>Regdate</th>
+                            <th>Changedate</th>
+                        </tr>
+                    </thead>
+                    <tbody style="text-align:center;">
+                        <!-- prettier-ignore-start -->
+                        <% for (const admin of adminList) {%>
+                        <tr>
+                            <td><%=admin.adminId%></td>
+                            <td><%=admin.adminName%></td>
+                            <td>
+                                <!-- prettier-ignore -->
+                                <%=moment(admin.regDate).format("YYYY-MM-DD HH:mm:ss")%>
+                            </td>
+                            <td>
+                                <!-- prettier-ignore -->
+                                <%=moment(admin.changeDate).format("YYYY-MM-DD HH:mm:ss") %>
+                            </td>
+                        </tr>
+                        <%} %>
+                        <!-- prettier-ignore-end -->
+                    </tbody>
+                </table>
+                <div class="paging">
+                    <%if(page>1) {%>
+                        <span class="page_btn first_page"><<</span>
+                        <span class="page_btn previous_page"><</span>                
+                    <%}%>
+                    <%for(let i = (page-1)*10*limit; i< max; i=i+Number(limit)){%>                
+                        <span class="<%=offset==(i/limit)?'active_page':'page_btn'%>"><%=(i/limit)+1%></span>
+                        <%if((i/limit)+1 >=page*10) {%>
+                        <span class="page_btn next_page">></span>
+                        <span class="page_btn last_page">>></span>
+                        <%break%>
+                        <%}%>
+                    <%}%>
+                </div>
+                <input type="hidden" name="page" id="listPage" value="<%=page%>"/>
+            </form>
+        </div>
+    </body>
+</html>

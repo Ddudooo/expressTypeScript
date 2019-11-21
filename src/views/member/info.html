@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>EXPRESS TEST</title>
+    </head>
+    <body>
+        <h2>INFORMATION</h2>
+        <div>
+            <form method="POST">
+                <label for="signin-id">ID</lable>
+                    <input type="text" name="signin-id" id="signin-id" value="<%=member.userId%>" required readonly/>
+                
+                <label for="signup-nickName">NICKNAME</lable>
+                    <input type="text" name="signup-nickName" id="signup-nickName" value="<%=member.nickName%>" required/>
+                
+                <label for="signin-pw">PW</label>
+                    <input type="password" name="signin-pw" id="signin-pw" value=""/>
+                
+                <button type="submit">modify</button>
+            </form>
+        </div>
+    </body>
+</html>

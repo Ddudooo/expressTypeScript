@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>EXPRESS TEST</title>
+    </head>
+    <body>
+        <h1>TEST NAVI</h1>
+        <form method="POST">
+            <label>
+                도착지
+                <input
+                    type="text"
+                    name="endPoint"
+                    id="endPoint"
+                    placeholder="end point"
+                    required
+                />
+            </label>
+            <button type="submit">길 찾기</button>
+        </form>
+        <div id="map" style="width:500px;height:400px;"></div>
+        <script
+            type="text/javascript"
+            src="//dapi.kakao.com/v2/maps/sdk.js?appkey=<%= key%>&libraries=services,drawing"
+        ></script>
+        <script>
+            var container = document.getElementById("map");
+            var options = {
+                center: new kakao.maps.LatLng(33.450701, 126.570667),
+                level: 3
+            };
+
+            if(navigator.geolocation){
+                navigator.geolocation.getCurrentPosition(function(position){
+                    var lat = position.coords.latitude,
+                        lon = position.coords.longitude;
+                    
+                    var locPosition = new kakao.maps.LatLng(lat,lon);
+                    map.setCenter(locPosition);
+                })
+            }
+
+            var map = new kakao.maps.Map(container, options);
+
+            kakao.maps.event.addListener(map, "idle", function() {
+                console.log("test");
+                console.log(marker);
+                if (marker) {
+                    marker.setPosition(map.getCenter());
+                    markerInfo();
+                }
+            });
+
+            kakao.maps.event.addListener(map, "dragstart", function() {
+                if (iwAry.length > 0) {
+                    for (i = 0; i < iwAry.length; i++) {
+                        iwAry[i].close();
+                    }
+                }
+            });
+
+            var geocoder = new kakao.maps.services.Geocoder();
+
+            function markerInfo() {
+                if (iwAry.length > 0) {
+                    for (i = 0; i < iwAry.length; i++) {
+                        iwAry[i].close();
+                    }
+                }
+                var dragEndPosition = marker.getPosition();
+                map.setCenter(dragEndPosition);
+                //마커 기준으로 검색
+                geocoder.coord2Address(
+                    dragEndPosition.Ga,
+                    dragEndPosition.Ha,
+                    function(result, status) {
+                        if ((status = kakao.maps.services.Status.OK)) {
+                            console.log(result);
+                            if (result.length > 0) {
+                                var adr = result[0].address;
+                                var r_adr = result[0].road_address;
+                                var infoContent =
+                                    '<div style="padding:5px;" class="iwm">' +
+                                    "TEST KAKAO MAP API! <br>" +
+                                    (adr
+                                        ? adr.address_name !== null
+                                            ? "<p>주소 : " +
+                                              adr.address_name +
+                                              "</p>"
+                                            : ""
+                                        : "") +
+                                    (r_adr
+                                        ? r_adr.address_name !== null
+                                            ? "<p>도로명 : " +
+                                              r_adr.address_name +
+                                              "</p>"
+                                            : ""
+                                        : "") +
+                                    '<a href="https://map.kakao.com/link/map/목적지,' +
+                                    dragEndPosition.Ha +
+                                    "," +
+                                    dragEndPosition.Ga +
+                                    '" style="color:blue" target="_blank">큰지도보기</a> <a href="https://map.kakao.com/link/to/목적지,' +
+                                    dragEndPosition.Ha +
+                                    "," +
+                                    dragEndPosition.Ga +
+                                    '" style="color:blue" target="_blank">길찾기</a></div>';
+                                var infowindow = new kakao.maps.InfoWindow({
+                                    position: dragEndPosition,
+                                    content: infoContent
+                                });
+                                infowindow.open(map, marker);
+                                iwAry.push(infowindow);
+                            } else {
+                                var adr = null;
+                                var r_adr = null;
+                            }
+                        }
+                    }
+                );
+            }
+
+            // 마커가 표시될 위치입니다
+            var markerPosition = new kakao.maps.LatLng(33.450701, 126.570667);
+
+            // 마커를 생성합니다
+            var marker = new kakao.maps.Marker({
+                position: markerPosition
+            });
+
+            var iwAry = [];
+
+            // 마커가 지도 위에 표시되도록 설정합니다
+            marker.setMap(map);
+
+            // 마커가 드래그 가능하도록 설정합니다
+            marker.setDraggable(true);
+
+            kakao.maps.event.addListener(marker, "dragstart", function() {
+                if (iwAry.length > 0) {
+                    for (i = 0; i < iwAry.length; i++) {
+                        iwAry[i].close();
+                    }
+                }
+            });
+            // 마커 드래그 종료
+            kakao.maps.event.addListener(marker, "dragend", function() {
+                markerInfo();
+            });
+        </script>
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        <script>
+            function translateAddr(addr) {
+                axios({
+                    method: "post",
+                    url: "/tl",
+                    timeout: 4000, // 4 seconds timeout
+                    data: {
+                        question: addr,
+                        tl: "en"
+                    }
+                })
+                    .then(response => {
+                        console.log(response.data);
+                        return response.data;
+                    })
+                    .catch(error => {
+                        console.error("timeout exceeded");
+                        return addr;
+                    });
+            }
+        </script>
+    </body>
+</html>

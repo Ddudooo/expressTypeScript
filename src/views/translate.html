@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>EXPRESS TEST</title>
+    </head>
+    <body>
+        <h2>TEST TRANSLATE</h2>
+        <div style="display:inline-block;">
+            <form method="POST" style="display:block;">
+                <lable style="display:block;">
+                    translate language
+                    <select name="tl">
+                        <option value="auto">AUTO (EN)</option>
+                        <% for(const a of locals){%>
+                        <option value="<%=a[0]%>"><%=a[1]%></option>
+                        <%}%>
+                    </select>
+                </lable>
+                <textarea name="question" style="width: 100%"> </textarea>
+                <button type="submit" style="display:block;">translate</button>
+            </form>
+        </div>
+    </body>
+</html>
