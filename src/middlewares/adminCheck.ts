@@ -5,6 +5,10 @@ import { Transaction } from "sequelize/types";
 import { verifyJWT, refreshToken } from "../utils/tokenUtils";
 import { AdminToken, Admin, AdminActionLog } from "../models/admin";
 
+/**
+ * 어드민 토큰 확인 미들 웨어
+ */
+
 export function adminLoginCheck(
     req: Request,
     res: Response,

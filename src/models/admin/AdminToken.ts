@@ -17,6 +17,11 @@ import {
 import { Admin } from "./Admin";
 import { AdminLoginLog } from "./AdminLoginLog";
 
+/**
+ * 어드민 토큰 로그
+ * 기본 유저 토큰이랑 별차이가 없어 컬럼 추가하고 합칠 예정
+ */
+
 @Table({
     tableName: "admin_token"
 })

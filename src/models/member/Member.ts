@@ -18,6 +18,10 @@ import {
 import crypto from "crypto";
 import { Token } from "./Token";
 import { LoginLog } from ".";
+
+/**
+ * 유저
+ */
 @Table
 export class Member extends Model<Member> {
     @PrimaryKey

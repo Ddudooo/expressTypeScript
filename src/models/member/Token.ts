@@ -21,6 +21,9 @@ import {
 import { Member } from "./Member";
 import { LoginLog } from ".";
 
+/**
+ * 유저 JWT 로그
+ */
 @Table
 export class Token extends Model<Token> {
     @AutoIncrement

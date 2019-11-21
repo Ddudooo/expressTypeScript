@@ -16,6 +16,10 @@ import {
 import crypto from "crypto";
 import { AdminToken } from "./AdminToken";
 import { AdminLoginLog } from "./AdminLoginLog";
+
+/**
+ * Admin 계정 테이블 정의
+ */
 @Table
 export class Admin extends Model<Admin> {
     @PrimaryKey

@@ -5,6 +5,10 @@ import { Token } from "../models/member";
 import { sequelize } from "../sequelize";
 import { Transaction } from "sequelize/types";
 
+/**
+ * 유저 토큰 확인 미들 웨어
+ */
+
 export function loginCheck(req: Request, res: Response, next: NextFunction) {
     let access: string =
         req.cookies["test.sign"] || req.headers["authorization"];

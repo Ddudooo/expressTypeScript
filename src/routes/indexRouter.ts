@@ -16,6 +16,11 @@ import { translateText } from "../utils/translateUtils/translateGoogle";
 
 import { Op } from "sequelize";
 
+/**
+ * 기본 경로 라우팅
+ * 너무 길어져서 분리 예정
+ */
+
 const router = express.Router();
 
 router.all("/", (req: Request, res: Response) => {

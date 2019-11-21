@@ -16,6 +16,9 @@ import {
 import { Admin } from "./Admin";
 import { AdminToken } from "./AdminToken";
 
+/**
+ * 어드민 로그인 시도 로그 정의
+ */
 @Table({
     tableName: "admin_loginlog"
 })

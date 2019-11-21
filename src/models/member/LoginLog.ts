@@ -20,6 +20,9 @@ import {
 import { Member } from "./Member";
 import { Token } from "./Token";
 
+/**
+ * 유저 로그인 시도 로그
+ */
 @Table({
     tableName: "loginlog"
 })

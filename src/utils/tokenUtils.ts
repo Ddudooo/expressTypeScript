@@ -6,7 +6,11 @@ import path from "path";
 import fs from "fs";
 import { Transaction } from "sequelize/types";
 import { AdminToken, Admin, AdminActionLog } from "../models/admin";
-import Bluebird from "bluebird";
+
+/**
+ * 중복 사용에 코드가 길어져서 분리
+ * 토큰 발행, 정지 기능들...
+ */
 
 export class payloadJWT {
     exp?: number;

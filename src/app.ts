@@ -1,3 +1,4 @@
+//express
 import express, { Request, Response, NextFunction } from "express";
 import createError from "http-errors";
 import path from "path";
@@ -13,13 +14,14 @@ import {
     adminLoginRouter,
     adminAdminRouter
 } from "./routes/admin";
+//lib
 import io, { Socket } from "socket.io";
 import { sequelize } from "./sequelize";
 import nodeRSA from "node-rsa";
 import fs from "fs";
-import { searchLocaleCode } from "./utils/translateUtils";
-
 import dotenv from "dotenv";
+//custom modules
+import { searchLocaleCode } from "./utils/translateUtils";
 import { adminLoginCheck } from "./middlewares/adminCheck";
 dotenv.config({ path: path.resolve(__dirname, ".env") });
 
@@ -52,11 +54,15 @@ const app = express();
 
 sequelize.sync();
 
+//Express view engine setting
 app.set("views", path.join(__dirname, "/views"));
 app.engine("html", require("ejs").renderFile);
 app.set("view engine", "html");
 
+//Logger middle ware
 app.use(morgan("dev"));
+
+//Body parser, Cookie parser middleware
 app.use(bodyParser.json());
 app.use(
     bodyParser.urlencoded({
@@ -65,6 +71,7 @@ app.use(
 );
 app.use(cookieParser());
 
+//express session setting
 app.use(
     session({
         secret: "secret",
@@ -73,9 +80,9 @@ app.use(
     })
 );
 
+//Local setting middle ware
 app.use((req: Request, res: Response, next: NextFunction) => {
     //locale setting middle ware
-
     try {
         if (searchLocaleCode(req.query["lang"]) !== "auto") {
             res.setHeader("Content-language", req.query["lang"]);
