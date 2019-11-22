@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>HTML5 MEDIA</title>
+        <script src="/js/jquery-3.4.1.min.js"></script>
+    </head>
+    <body>
+        <script>
+            function hasGetuserMedia() {
+                return !!(
+                    navigator.getUserMedia ||
+                    navigator.webkitGetuserMedia ||
+                    navigator.mozGetUserMedia ||
+                    navigator.msGetUserMedia
+                );
+            }
+            $().ready(function() {
+                if (hasGetuserMedia()) {
+                    console.log("MEDIA API OK");
+                    var player = $("#player");
+                    navigator.mediaDevices
+                        .getUserMedia({
+                            audio: true,
+                            video: false
+                        })
+                        .then(function(stream) {
+                            if (window.URL) {
+                                player.src = window.URL.createObjectURL(stream);
+                            } else {
+                                player.src = stream;
+                            }
+                        })
+                        .catch(function(err) {
+                            console.log(err);
+                        });
+                } else {
+                    alert("FAIL MEDIA API");
+                }
+            });
+        </script>
+        <h1>TEST HTML5 MEDIA</h1>
+        <h2>Web Audio API</h2>
+        <div>
+            <span></span>
+            <div>
+                <form action="/test/media" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="uploadFile" />
+                    <button type="submit">upload</button>
+                </form>
+                <audio id="player" controls></audio>
+            </div>
+        </div>
+    </body>
+</html>
