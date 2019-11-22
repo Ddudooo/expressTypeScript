@@ -1,0 +1,11 @@
+<div class="paging">
+    <%if(page>1) {%>
+    <span class="page_btn first_page"><<</span>
+    <span class="page_btn previous_page"><</span>
+    <%}%> <%for(let i = (page-1)*10*limit; i< max; i=i+Number(limit)){%>
+    <span class="<%=offset==(i/limit)?'active_page':'page_btn'%>"><%=(i/limit)+1%></span>
+    <%if((i/limit)+1 >=page*10) {%>
+    <span class="page_btn next_page">></span>
+    <span class="page_btn last_page">>></span>
+    <%break%> <%}%> <%}%>
+</div>

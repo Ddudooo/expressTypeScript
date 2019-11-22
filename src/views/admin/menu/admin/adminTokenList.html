@@ -1,125 +1,75 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>EXPRESS ADMIN TEST</title>
-        <style>
-            .paging{
-                text-align: center;
-                margin-top: 20px;
-            }
-            .page_btn{
-                display: inline-block;
-                border : 1px solid #333;
-                padding : 2px 3px;
-                cursor: pointer;
-            }
-        </style>
-        <script src="/js/jquery-3.4.1.min.js"></script>
-        <script>
-            $().ready(function(){
-                var adminTokenListFrm = $('#adminTokenListFrm');
-                $('.page_btn').on("click", function(){
-                    console.log(this);
-                    console.log($(this).hasClass('next_page'));
-                    if($(this).hasClass('next_page')){
-                        adminTokenListFrm.append("<input type='hidden' name='offset' value='"+"<%=page*10+1%>"+"'/>");
-                        //adminTokenListFrm.append("<input type='hidden' name='page' value='"+"<%=(page+1)%>"+"'/>");
-                        $('#listPage').val("<%=(page+1)%>");
-                    }else if($(this).hasClass('previous_page')){
-                        adminTokenListFrm.append("<input type='hidden' name='offset' value='"+"<%=(page-1)*10%>"+"'/>");
-                        //adminTokenListFrm.append("<input type='hidden' name='page' value='"+"<%=page-1%>"+"'/>");
-                        $('#listPage').val("<%=(page+1)%>");
-                    }else if($(this).hasClass("first_page")){
-                        adminTokenListFrm.append("<input type='hidden' name='offset' value='1'/>");
-                        $('#listPage').val("1");
-                    }else if($(this).hasClass("last_page")){
-                        adminTokenListFrm.append("<input type='hidden' name='offset' value='"+"<%=Math.floor((max/limit)+1)%>"+"'/>");
-                        $('#listPage').val("<%=Math.floor(((max/limit)+1)/10+1)%>");
-                    }else{
-                        adminTokenListFrm.append("<input type='hidden' name='offset' value='"+this.innerHTML+"'/>");                        
-                    }   
-                    adminTokenListFrm.submit();                 
-                });
-                $('.listLimit').on("change",function(){
-                    $('#listPage').val("1");
-                    adminTokenListFrm.submit();
-                });
-            })            
-        </script>
-    </head>
-    <body>
-        <h1>INFORMATION</h1>
-        <h2>TOKEN LIST</h2>        
-        <div>            
-            <form id="adminTokenListFrm" method="POST">
-                <div style="display:block;">
-                    <%if(max >0){%><span> Total <%=max%> </span><%}%>
-                    <span style="float: right;">
-                        <select name="limit" class="listLimit">
-                            <option value="10" <%=limit==10? 'selected':'' %>>10</option>
-                            <option value="25" <%=limit==25? 'selected':'' %>>25</option>
-                            <option value="50" <%=limit==50? 'selected':'' %>>50</option>
-                            <option value="100" <%=limit==100? 'selected':'' %>>100</option>
-                        </select>
-                    </span>
-                </div>
-            <table style="width:100%;">
-                <thead>
-                    <tr>
-                        <th>Admin</th>
-                        <th>Token</th>
-                        <th>Token Type</th>
-                        <th>Expired</th>
-                        <th>Regdate</th>
-                        <th>Changedate</th>
-                        <th>Block</th>
-                    </tr>
-                </thead>
-                <tbody style="text-align: center;">
-                    <!-- prettier-ignore-start -->
-                    <% for (const token of adminTokenList) {%>                        
-                    <tr>
-                        <td><%=token.admin.adminName%></td>
-                        <td>
-                            <%=token.token.length>10?token.token.slice(0,10)+"...":token.token%>                            
-                        </td>
-                        <td><%=token.tokenType%></td>
-                        <td>
-                            <!-- prettier-ignore -->
-                            <%=moment(token.expired).format("YYYY-MM-DD HH:mm:ss")%>
-                        </td>
-                        <td>
-                            <!-- prettier-ignore -->
-                            <%=moment(token.regDate).format("YYYY-MM-DD HH:mm:ss")%>
-                        </td>
-                        <td>
-                            <!-- prettier-ignore -->
-                            <%=moment(token.changeDate).format("YYYY-MM-DD HH:mm:ss") %>
-                        </td>
-                        <td>
-                            <%=token.block%>
-                        </td>
-                    </tr>
-                    <%} %>                   
-                    <!-- prettier-ignore-end -->
-                </tbody>                
-            </table>
-            <div class="paging">
-            <%if(page>1) {%>
-                <span class="page_btn first_page"><<</span>
-                <span class="page_btn previous_page"><</span>                
-            <%}%>
-            <%for(let i = (page-1)*10*limit; i< max; i=i+Number(limit)){%>                
-                <span class="<%=offset==(i/limit)?'active_page':'page_btn'%>"><%=(i/limit)+1%></span>
-                <%if((i/limit)+1 >=page*10) {%>
-                <span class="page_btn next_page">></span>
-                <span class="page_btn last_page">>></span>
-                <%break%>
-                <%}%>
-            <%}%>
+<% include ../../include/header.html %>
+    <style>
+        .paging{
+            text-align: center;
+            margin-top: 20px;
+        }
+        .page_btn{
+            display: inline-block;
+            border : 1px solid #333;
+            padding : 2px 3px;
+            cursor: pointer;
+        }
+    </style>
+    <% include ../../include/listFrm.html %>
+    <h1>INFORMATION</h1>
+    <h2>TOKEN LIST</h2>        
+    <div>            
+        <form id="listFrm" method="POST">
+            <div style="display:block;">
+                <%if(max >0){%><span> Total <%=max%> </span><%}%>
+                <span style="float: right;">
+                    <select name="limit" class="listLimit">
+                        <option value="10" <%=limit==10? 'selected':'' %>>10</option>
+                        <option value="25" <%=limit==25? 'selected':'' %>>25</option>
+                        <option value="50" <%=limit==50? 'selected':'' %>>50</option>
+                        <option value="100" <%=limit==100? 'selected':'' %>>100</option>
+                    </select>
+                </span>
             </div>
-            <input type="hidden" name="page" id="listPage" value="<%=page%>"/>
-            </form>
-        </div>
-    </body>
-</html>
+        <table style="width:100%;">
+            <thead>
+                <tr>
+                    <th>Admin</th>
+                    <th>Token</th>
+                    <th>Token Type</th>
+                    <th>Expired</th>
+                    <th>Regdate</th>
+                    <th>Changedate</th>
+                    <th>Block</th>
+                </tr>
+            </thead>
+            <tbody style="text-align: center;">
+                <!-- prettier-ignore-start -->
+                <% for (const token of adminTokenList) {%>                        
+                <tr>
+                    <td><%=token.admin.adminName%></td>
+                    <td>
+                        <%=token.token.length>10?token.token.slice(0,10)+"...":token.token%>                            
+                    </td>
+                    <td><%=token.tokenType%></td>
+                    <td>
+                        <!-- prettier-ignore -->
+                        <%=moment(token.expired).format("YYYY-MM-DD HH:mm:ss")%>
+                    </td>
+                    <td>
+                        <!-- prettier-ignore -->
+                        <%=moment(token.regDate).format("YYYY-MM-DD HH:mm:ss")%>
+                    </td>
+                    <td>
+                        <!-- prettier-ignore -->
+                        <%=moment(token.changeDate).format("YYYY-MM-DD HH:mm:ss") %>
+                    </td>
+                    <td>
+                        <%=token.block%>
+                    </td>
+                </tr>
+                <%} %>                   
+                <!-- prettier-ignore-end -->
+            </tbody>                
+        </table>
+        <% include ../../include/paging.html %>
+        <input type="hidden" name="page" id="listPage" value="<%=page%>"/>
+        </form>
+    </div>
+<% include ../../include/footer.html %>

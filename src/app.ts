@@ -16,6 +16,7 @@ import {
 } from "./routes/admin";
 //lib
 import io, { Socket } from "socket.io";
+import http from "http";
 import { sequelize } from "./sequelize";
 import nodeRSA from "node-rsa";
 import fs from "fs";
@@ -51,6 +52,8 @@ if (
 }
 
 const app = express();
+const server = http.createServer(app);
+const websocket = io(http);
 
 sequelize.sync();
 
@@ -131,7 +134,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
             return res.render("member/signin");
         }
     }
-    next();
+    next(err);
 });
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
@@ -144,12 +147,17 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     res.render("error");
 });
 
+server.listen(5000, "0.0.0.0", () => {
+    console.log(
+        "Server Start\nSERVER LISTENING PORT 5000\nSERVER LISTENING HOST 0.0.0.0"
+    );
+});
 //export default app;
-const websocket = io.listen(
-    app.listen(5000, "0.0.0.0", () => {
-        console.log("SERVER START LISTENING PORT 5000");
-    })
-);
+// const websocket = io.listen(
+//     app.listen(5000, "0.0.0.0", () => {
+//         console.log("SERVER START LISTENING PORT 5000");
+//     })
+// );
 
 // websocket
 websocket.on("connection", (socket: Socket) => {

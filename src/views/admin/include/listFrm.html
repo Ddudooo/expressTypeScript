@@ -1,0 +1,29 @@
+<script>
+    $().ready(function() {
+        var listFrm = $("#listFrm");
+        $(".page_btn").on("click", function() {
+            if ($(this).hasClass("next_page")) {
+                listFrm.append("<input type='hidden' name='offset' value='" + "<%=page*10+1%>" + "'/>");
+                //listFrm.append("<input type='hidden' name='page' value='"+"<%=(page+1)%>"+"'/>");
+                $("#listPage").val("<%=(page+1)%>");
+            } else if ($(this).hasClass("previous_page")) {
+                listFrm.append("<input type='hidden' name='offset' value='" + "<%=(page-1)*10%>" + "'/>");
+                //listFrm.append("<input type='hidden' name='page' value='"+"<%=page-1%>"+"'/>");
+                $("#listPage").val("<%=(page-1)%>");
+            } else if ($(this).hasClass("first_page")) {
+                listFrm.append("<input type='hidden' name='offset' value='1'/>");
+                $("#listPage").val("1");
+            } else if ($(this).hasClass("last_page")) {
+                listFrm.append("<input type='hidden' name='offset' value='" + "<%=Math.floor((max/limit)+1)%>" + "'/>");
+                $("#listPage").val("<%=Math.floor(((max/limit)+1)/10+1)%>");
+            } else {
+                listFrm.append("<input type='hidden' name='offset' value='" + this.innerHTML + "'/>");
+            }
+            listFrm.submit();
+        });
+        $(".listLimit").on("change", function() {
+            $("#listPage").val("1");
+            listFrm.submit();
+        });
+    });
+</script>

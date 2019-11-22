@@ -20,16 +20,23 @@ router.all("/menu/admin/list", (req: Request, res: Response) => {
         order: [[req.body["orderBy"] || "idx", req.body["order"] || "DESC"]]
     })
         .then(result => {
-            res.render("admin/menu/admin/adminList", {
-                adminList: result.rows,
-                max: result.count,
-                page: Number(req.body["page"]) || 1,
-                offset: req.body["offset"] - 1 || 0,
-                limit: req.body["limit"] || 10,
-                orderBy: req.body["orderBy"] || "idx",
-                order: req.body["order"] || "DESC",
-                moment: moment
-            });
+            res.render(
+                "admin/menu/admin/adminList",
+                {
+                    adminList: result.rows,
+                    max: result.count,
+                    page: Number(req.body["page"]) || 1,
+                    offset: req.body["offset"] - 1 || 0,
+                    limit: req.body["limit"] || 10,
+                    orderBy: req.body["orderBy"] || "idx",
+                    order: req.body["order"] || "DESC",
+                    moment: moment
+                },
+                (err, html) => {
+                    if (err) console.log(err);
+                    res.send(html);
+                }
+            );
             return;
         })
         .catch((err: any) => {

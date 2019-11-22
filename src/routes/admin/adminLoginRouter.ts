@@ -69,10 +69,7 @@ router.post("/signin", (req: Request, res: Response) => {
                     }
                 })
                 .then(([accessToken, refreshToken]) => {
-                    console.log(`ACCESS - ${accessToken.token}`);
-                    console.log(`REFRESH - ${refreshToken.token}`);
                     log.set("tokenIdx", refreshToken.idx);
-                    log.set("confirm", true);
                     res.cookie("test.admin.refresh", refreshToken.token, {
                         expires: new Date(Number(refresh.exp) * 1000)
                     });
@@ -92,11 +89,12 @@ router.post("/signin", (req: Request, res: Response) => {
                 .then(result => result)
         )
         .then(() => {
-            log.set("confirm", false);
+            log.set("confirm", true);
         })
         .catch(err => {
             console.error(err);
             log.set("tokenIdx", null);
+            log.set("confirm", false);
             res.clearCookie("test.admin.sign");
             res.clearCookie("test.admin.refresh");
             res.setHeader("referer", req.headers["referer"] || "/");
