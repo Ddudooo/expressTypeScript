@@ -1,0 +1,120 @@
+<% include ../../include/header.html %>
+    <style>
+        .paging{
+            text-align: center;
+            margin-top: 20px;
+        }
+        .page_btn{
+            display: inline-block;
+            border : 1px solid #333;
+            padding : 2px 3px;
+            cursor: pointer;
+        }
+        #preview{
+            z-index: 9999;
+            position: absolute;
+            border: 0px solid #ccc;
+            background: #333;
+            color: #efefef;
+            padding: 1px 5px;
+            display : none;
+        }
+        .msgTime {
+            float: right;
+            color: #999;
+        }
+    </style>
+    <% include ../../include/listFrm.html %>
+    <script>
+        var xOffset = 10;
+        var yOffset = 30;
+        $().ready(function(){
+            $(".chatLog").on("mouseover", function(e){                
+                if($("#preview").length<=0){
+                    $("body").append("<p id=\"preview\"><span>Loading...</span><span class=\"msgTime\">"+$(this).children("td:last").text()+"</span></p> ");
+                    $("#preview").css("top",(e.pageY- xOffset) +"px")
+                                .css("left",(e.pageX +yOffset)+"px")
+                                .fadeIn("fast");
+                    $.ajax({
+                        url: "/admin/menu/member/log/chat/preview",
+                        data: { previewIdx : $(this).children("td:first").text()},
+                        method: "POST"
+                    }).done(function(data){
+                        if($("#preview").length>0){
+                            $("#preview").find("span:first").text(data.member.nickName+" > "+data.chat);
+                        }                        
+                    }).fail(function(xhr, status, errorThrown){
+                        if($("#preview").length>0){
+                            $("#preview").find("span:first").text("Server > "+errorThrown);
+                        }
+                    });
+                }                
+            });
+            $(".chatLog").on("mousemove", function(e){
+                $("#preview").css("top",(e.pageY - xOffset) + "px")
+                .css("left",(e.pageX + yOffset) + "px");
+            })
+            $(".chatLog").on("mouseout", function(){
+                $("#preview").remove();
+            })
+        })
+    </script>
+    <h1>INFORMATION</h1>
+    <h2>CHAT LOG LIST</h2>        
+    <div>            
+        <form id="listFrm" method="POST">
+            <div style="display:block;">
+                <%if(max >0){%><span> Total <%=max%> </span><%}%>
+                <span style="float: right;">
+                    <select name="limit" class="listLimit">
+                        <option value="10" <%=limit==10? 'selected':'' %>>10</option>
+                        <option value="25" <%=limit==25? 'selected':'' %>>25</option>
+                        <option value="50" <%=limit==50? 'selected':'' %>>50</option>
+                        <option value="100" <%=limit==100? 'selected':'' %>>100</option>
+                    </select>
+                </span>
+            </div>
+        <table style="width:100%;">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Member<br/>(NickName)</th>
+                    <th>IP</th>
+                    <th>ROOM</th>
+                    <th>CHAT</th>                    
+                    <th>Regdate</th>                    
+                </tr>
+            </thead>
+            <tbody style="text-align: center;">
+                <!-- prettier-ignore-start -->
+                <% for (const log of logList) {%>                        
+                <tr class="chatLog">
+                    <td><%=log.idx%></td>
+                    <td>
+                        <%=log.member?log.member.userId:"UNKNOWN"%>
+                        <br/>
+                        (<%=log.member?log.member.nickName:"UNKNOWN"%>)
+                    </td>
+                    <td>
+                        <%let ip = log.ipaddress;%>
+                        <%=ip.slice(0,ip.indexOf('.'))+'.*.*'+ip.slice(ip.lastIndexOf('.'))%>
+                    </td>
+                    <td><%=log.chatRoom%></td>
+                    <td>
+                        <%let chat = log.chat;%>
+                        <%=chat.length>10?(chat.slice(0,10)+"..."):chat%>
+                    </td>                    
+                    <td>
+                        <!-- prettier-ignore -->
+                        <%=moment(log.regDate).format("YYYY-MM-DD HH:mm:ss")%>
+                    </td>                    
+                </tr>
+                <%} %>                   
+                <!-- prettier-ignore-end -->
+            </tbody>                
+        </table>
+        <% include ../../include/paging.html%>
+        <input type="hidden" name="page" id="listPage" value="<%=page%>"/>
+        </form>
+    </div>
+<% include ../../include/footer.html %>

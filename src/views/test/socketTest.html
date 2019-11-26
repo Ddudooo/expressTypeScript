@@ -11,6 +11,7 @@
             body {
                 background: #333;
                 color: #eee;
+                height: 100%;
                 font: 13px Helvetica, Arial;
             }
             form {
@@ -33,6 +34,20 @@
                 border-radius: 3px;
                 padding: 10px;
             }
+            .msgWrapper {
+                position: relative;
+            }
+            .msgTime {
+                float: right;
+                color: #999;
+            }
+            .errMsg {
+                background: #f33 !important;
+                font-weight: 700 !important;
+            }
+            #inputForm {
+                height: 45px;
+            }
             #messages {
                 background: #333;
                 color: #efefef;
@@ -47,65 +62,169 @@
                 background: #555;
             }
         </style>
+        <script src="/js/jquery-3.4.1.min.js"></script>
+        <script src="/js/jquery.cookie.js"></script>
     </head>
     <body>
         <h1>TEST WEBSOCKET</h1>
         <h2>test</h2>
-        <div>
+        <div class="msgWrapper">
             <ul id="messages"></ul>
-            <form onsubmit="sendMsg(); return false;">
-                <input type="text" id="msg" /><button type="submit">SEND</button>
-            </form>
-            <script src="/socket.io/socket.io.js"></script>
-            <script>
-                var socket = io("http://localhost:5000");
-                var msgList = document.getElementById("messages");
-                socket.on("news", function(data) {
-                    console.log(data);
-                    socket.emit("my other event", { my: "data" });
-                });
-                socket.on("send msg", function(data) {
-                    addMsg(data);
-                });
-                socket.on("disconnect", function(reason) {
-                    console.log(reason);
-                    addMsg("Connection disconnect...");
-                });
-                function sendMsg() {
-                    var msg = document.getElementById("msg").value;
-                    if (msg.search("/") == 0) {
-                        if (msg.search("change name") == 1) {
-                            msg = msg.substring("/change name".length);
-                            changeName(msg);
-                        }
-                        if (msg.search("joinRoom") == 1) {
-                            msg = msg.substring("/joinRoom".length);
-                            joinRoom(msg);
-                        }
-                        if (msg.search("clear") == 1) {
-                            while (msgList.firstChild) {
-                                msgList.removeChild(msgList.firstChild);
-                            }
-                        }
-                    } else {
-                        console.log("SEND MSG " + msg);
-                        socket.emit("send msg", { msg: msg });
-                    }
-                    document.getElementById("msg").value = "";
-                }
-                function addMsg(data) {
-                    var newMsg = document.createElement("LI");
-                    var newMsgText = document.createTextNode(data.sender + " > " + data.msg);
-                    newMsg.appendChild(newMsgText);
-                    msgList.appendChild(newMsg);
-                }
-                function changeName(name) {
-                    socket.emit("change name", { id: name });
-                }
-                function joinRoom(room) {
-                    socket.emit("join Room", { room: room });
-                }
-            </script>
+            <div id="inputForm"></div>
         </div>
+        <form onsubmit="sendMsg(); return false;">
+            <input type="text" id="msg" /><button type="submit">SEND</button>
+        </form>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            var isAutoScroll = true;
+            $(window).scroll(function() {
+                if ($(window).scrollTop() == $(document).height() - $(window).height()) {
+                    isAutoScroll = true;
+                } else {
+                    isAutoScroll = false;
+                }
+            });
+        </script>
+        <script>
+            var reconnectTimeout;
+            var socket = io("http://localhost:5000");
+            socket.on("error", function(error) {
+                addMsg({ class: "errMsg", sender: "Server", msg: error, date: Date.now() });
+                if (reconnectTimeout) {
+                    clearTimeout(reconnectTimeout);
+                }
+                socket.disconnect();
+            });
+            socket.on("connect", function() {
+                if (reconnectTimeout) {
+                    clearTimeout(reconnectTimeout);
+                }
+                addMsg({ sender: "Server", msg: "Server connected", date: Date.now() });
+            });
+            socket.on("disconnect", function(reason) {
+                addMsg({ sender: "Server", msg: "disconnect... " + reason });
+                addMsg({ sender: "Server", msg: "Try reconnect..." });
+                reconnectTimeout = setTimeout(function reconnection() {
+                    socket.connect();
+                    setTimeout(reconnection, 1000);
+                }, 1000);
+            });
+            var msgList = document.getElementById("messages");
+            socket.on("news", function(data) {
+                console.log(socket.id);
+                console.log(data);
+                //socket.emit("my other event", { my: "data" });
+            });
+            socket.on("send msg", function(data) {
+                addMsg(data);
+                notify(data);
+            });
+            function sendMsg() {
+                var msg = document.getElementById("msg").value;
+                if (msg.length <= 0) {
+                    return;
+                }
+                if (msg.search("/") == 0) {
+                    if (msg.search("change name") == 1) {
+                        msg = msg.substring("/change name".length);
+                        changeName(msg);
+                    }
+                    if (msg.search("joinRoom") == 1) {
+                        msg = msg.substring("/joinRoom".length);
+                        joinRoom(msg);
+                    }
+                    if (msg.search("clear") == 1) {
+                        while (msgList.firstChild) {
+                            msgList.removeChild(msgList.firstChild);
+                        }
+                    }
+                } else {
+                    socket.emit("send msg", { msg: msg });
+                    addMsg({ msg: msg, date: Date.now() });
+                }
+                document.getElementById("msg").value = "";
+            }
+            function addMsg(data) {
+                let appendMsg =
+                    '<li class="' +
+                    (data.class ? data.class : data.sender ? "anotherMsg" : "meMsg") +
+                    '">' +
+                    (data.sender ? data.sender : "Me") +
+                    " > " +
+                    data.msg +
+                    '<span class="msgTime">' +
+                    dateToTimeStamp(data.date) +
+                    "</span>" +
+                    "</li>";
+                $(msgList).append(appendMsg);
+                autoScroll();
+            }
+            function changeName(name) {
+                socket.emit("change name", { id: name });
+            }
+            function joinRoom(room) {
+                socket.emit("join Room", { room: room });
+            }
+            function autoScroll() {
+                if (isAutoScroll) {
+                    $(document).scrollTop($(document).height());
+                }
+            }
+            function dateToTimeStamp(value) {
+                var date = new Date(value);
+                if (isNaN(date.getDate())) {
+                    date = new Date(Date.now());
+                }
+                return (
+                    date.getFullYear() +
+                    "." +
+                    addZero(date.getMonth()) +
+                    "." +
+                    addZero(date.getDate()) +
+                    " " +
+                    addZero(date.getHours()) +
+                    ":" +
+                    addZero(date.getMinutes()) +
+                    ":" +
+                    addZero(date.getSeconds()) +
+                    "." +
+                    addZeroMils(date.getMilliseconds())
+                );
+            }
+            function addZero(i) {
+                if (i < 10) {
+                    i = "0" + i;
+                }
+                return i;
+            }
+            function addZeroMils(i) {
+                if (i < 10) {
+                    i = "00" + i;
+                } else if (i < 100) {
+                    i = "0" + i;
+                }
+                return i;
+            }
+            function notify(data) {
+                if ("Notification" in window) {
+                    if (Notification.permission === "granted") {
+                        var noti = new Notification(data.sender, {
+                            body: data.msg.length > 10 ? data.msg.slice(0, 10) + "..." : data.msg
+                        });
+                        setTimeout(noti.close.bind(noti), 4000);
+                    } else if (Notification.permission !== "denied") {
+                        Notification.requestPermission(function(permission) {
+                            if (permission === "granted") {
+                                var noti = new Notification(data.sender, {
+                                    body: data.msg.length > 10 ? data.msg.slice(0, 10) + "..." : data.msg
+                                });
+                                setTimeout(noti.close.bind(noti), 4000);
+                            }
+                        });
+                    }
+                }
+            }
+        </script>
     </body>
 </html>

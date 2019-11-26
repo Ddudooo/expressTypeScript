@@ -4,6 +4,7 @@ import { Member, Token, LoginLog } from "../../models/member";
 import createHttpError from "http-errors";
 import path from "path";
 import fx from "../../utils/iteratorUtils";
+import { ChatLog } from "../../models/websocket";
 
 const addStr = (a: any, b: any) => a + "" + b;
 
@@ -121,12 +122,69 @@ router.all("/menu/member/log/login", (req: Request, res: Response) => {
         });
 });
 
-router.get("/login", (req: Request, res: Response) => {
-    res.render("admin/login");
+router.all("/menu/member/log/chat", (req: Request, res: Response) => {
+    ChatLog.findAndCountAll({
+        include: [
+            {
+                model: Member,
+                attributes: ["userId", "nickName"],
+                required: false
+            }
+        ],
+        where: {},
+        offset: (req.body["offset"] - 1 || 0) * (req.body["limit"] || 10),
+        limit: Number(req.body["limit"]) || 10,
+        order: [[req.body["orderBy"] || "idx", req.body["order"] || "DESC"]]
+    })
+        .then(logList => {
+            res.render(
+                "admin/menu/member/chatLogList",
+                {
+                    logList: logList.rows,
+                    max: logList.count,
+                    page: Number(req.body["page"]) || 1,
+                    offset: req.body["offset"] - 1 || 0,
+                    limit: req.body["limit"] || 10,
+                    orderBy: req.body["orderBy"] || "idx",
+                    order: req.body["order"] || "DESC",
+                    moment: moment
+                },
+                (err, html) => {
+                    if (err) console.error(err);
+                    res.send(html);
+                }
+            );
+        })
+        .catch(err => {
+            console.error(err);
+            throw err;
+        });
 });
 
-router.post("/login", (req: Request, res: Response) => {
-    res.redirect(req.headers["referer"] || "/admin/menu/member");
+router.all("/menu/member/log/chat/preview", (req: Request, res: Response) => {
+    ChatLog.findOne({
+        include: [
+            {
+                model: Member,
+                attributes: ["userId", "nickName"],
+                required: false
+            }
+        ],
+        where: {
+            idx: req.body["previewIdx"]
+        }
+    })
+        .then(chatLog => {
+            if (chatLog !== null) {
+                return res.status(200).send(chatLog);
+            } else {
+                return res.status(404);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            return res.status(500).send(err);
+        });
 });
 
 export default router;
