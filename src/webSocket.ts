@@ -10,7 +10,10 @@ import { ChatLog } from "./models/websocket";
 import fs from "fs";
 import util from "util";
 import path from "path";
-const textToSpeech = require("@google-cloud/text-to-speech");
+// import buffer from "buffer";
+import * as textToSpeech from "@google-cloud/text-to-speech";
+// import { BufferReader } from "protobufjs";
+//const textToSpeech = require("@google-cloud/text-to-speech");
 
 const tts = async (text: string) => {
     // Creates a client
@@ -23,9 +26,9 @@ const tts = async (text: string) => {
     const request = {
         input: { text: text },
         // Select the language and SSML Voice Gender (optional)
-        voice: { languageCode: "ko-KR", ssmlGender: "NEUTRAL" },
+        voice: { languageCode: "ko-KR", ssmlGender: 3 },
         // Select the type of audio encoding
-        audioConfig: { audioEncoding: "MP3" }
+        audioConfig: { audioEncoding: 2 } //MP3
     };
 
     // Performs the Text-to-Speech request
@@ -71,24 +74,24 @@ const broadcastRoom = (socket: Socket, msg: string, cmd: boolean = false) => {
                                 socketAttr.get(socket.id).name +
                                 ", message, " +
                                 msg
-                        ).then(result => {
-                            // let stream = ss.createStream();
-                            // let filename = path.join(
-                            //     __dirname,
-                            //     "..",
-                            //     "output.mp3"
-                            // );
-                            socket.broadcast
-                                .to(socketAttr.get(socket.id).room)
-                                .emit("tts", {
-                                    sender: socketAttr.get(socket.id).name,
-                                    audio: new Buffer(
-                                        result,
-                                        "binary"
-                                    ).toString("base64"),
-                                    date: Date.now()
-                                });
-                        });
+                        )
+                            .then(result => {
+                                if (result !== undefined && result !== null) {
+                                    socket.broadcast
+                                        .to(socketAttr.get(socket.id).room)
+                                        .emit("tts", {
+                                            sender: socketAttr.get(socket.id)
+                                                .name,
+                                            audio: Buffer.from(
+                                                result.buffer
+                                            ).toString("base64"),
+                                            date: Date.now()
+                                        });
+                                }
+                            })
+                            .catch(e => {
+                                throw e;
+                            });
                     } else {
                         websocket
                             .to(socketAttr.get(socket.id).room)

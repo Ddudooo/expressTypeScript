@@ -12,11 +12,21 @@ import { AdminToken, Admin, AdminActionLog } from "../models/admin";
  * 토큰 발행, 정지 기능들...
  */
 
-export class payloadJWT {
+/**
+ * Token Generate Payload
+ */
+export interface payloadJWT {
     exp?: number;
     data?: any;
 }
 
+/**
+ * Create Token encryted payload
+ * @param payload interface payloadJWT
+ * @param type refresh - 0, access - 1
+ * @param t Transaction Object
+ * @param admin Admin check
+ */
 export function createJWT(
     payload: payloadJWT,
     type: number = 1,
@@ -33,6 +43,11 @@ export function createJWT(
     return afterCreateJWT(payload, token, salt, type, t, admin);
 }
 
+/**
+ * Create Token after insert DB
+ * @param token Created Token
+ * @param salt Token salt
+ */
 function afterCreateJWT(
     payload: payloadJWT,
     token: string,
@@ -78,7 +93,10 @@ function payloadDataEncryt(payload: payloadJWT): [payloadJWT, string] {
         .toString("base64");
     return [result, salt];
 }
-
+/**
+ * verify Token
+ * @param token - any type token
+ */
 export function verifyJWT(token: string): string {
     let publicKey: Buffer = fs.readFileSync(
         path.join(__dirname, "..", "config", "ServerPublicKey.pem")
