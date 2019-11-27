@@ -49,6 +49,7 @@
     },
     "dependencies": {
         "@google-cloud/speech": "^3.4.0",
+        "@google-cloud/text-to-speech": "^2.0.2",
         "@google-cloud/translate": "^5.0.2",
         "@types/request-promise-native": "^1.0.17",
         "body-parser": "^1.19.0",
@@ -70,6 +71,7 @@
         "sequelize-typescript": "^1.0.0",
         "socket.io": "^2.3.0",
         "socket.io-client": "^2.3.0",
+        "socket.io-stream": "^0.9.1",
         "validator": "^12.0.0"
     },
     "description": ""

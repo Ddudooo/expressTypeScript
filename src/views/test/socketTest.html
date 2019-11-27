@@ -88,7 +88,9 @@
         </script>
         <script>
             var reconnectTimeout;
+            var audioQueue = [];
             var socket = io("http://localhost:5000");
+            var audio = document.getElementById("audioSource");
             socket.on("error", function(error) {
                 addMsg({ class: "errMsg", sender: "Server", msg: error, date: Date.now() });
                 if (reconnectTimeout) {
@@ -115,6 +117,31 @@
                 console.log(socket.id);
                 console.log(data);
                 //socket.emit("my other event", { my: "data" });
+            });
+
+            socket.on("tts", function(data) {
+                if ($("#tts").length > 0) {
+                    // 기존 음성 데이터 있음
+                    if ($("#tts").prop("paused")) {
+                        // 기존 음성 데이터 재생 완료
+                        $("#tts source").attr("src", "data:audio/mp3;base64," + data.audio);
+                        $("#tts").trigger("load");
+                        $("#tts").trigger("play");
+                    } else {
+                        audioQueue.push(data.audio);
+                    }
+                } else {
+                    $("body").append('<audio id="tts"/>');
+                    $("#tts").append(`<source src="data:audio/mp3;base64,${data.audio}" type="audio/mp3">`);
+                    $("#tts").trigger("play");
+                    $("#tts").on("ended", function(e) {
+                        if (audioQueue.length > 0) {
+                            $("#tts source").attr("src", "data:audio/mp3;base64," + audioQueue.shift());
+                            $("#tts").trigger("load");
+                            $("#tts").trigger("play");
+                        }
+                    });
+                }
             });
             socket.on("send msg", function(data) {
                 addMsg(data);

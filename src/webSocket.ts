@@ -6,6 +6,37 @@ import { Transaction } from "sequelize/types";
 import { Token, Member } from "./models/member";
 import { ChatLog } from "./models/websocket";
 
+//text to speech
+import fs from "fs";
+import util from "util";
+import path from "path";
+const textToSpeech = require("@google-cloud/text-to-speech");
+
+const tts = async (text: string) => {
+    // Creates a client
+    const client = new textToSpeech.TextToSpeechClient();
+
+    // The text to synthesize
+    //const text = 'Hello, world!';
+
+    // Construct the request
+    const request = {
+        input: { text: text },
+        // Select the language and SSML Voice Gender (optional)
+        voice: { languageCode: "ko-KR", ssmlGender: "NEUTRAL" },
+        // Select the type of audio encoding
+        audioConfig: { audioEncoding: "MP3" }
+    };
+
+    // Performs the Text-to-Speech request
+    const [response] = await client.synthesizeSpeech(request);
+    // Write the binary audio content to a local file
+    return response.audioContent;
+    const writeFile = util.promisify(fs.writeFile);
+    await writeFile("output.mp3", response.audioContent, "binary");
+    console.log("Audio content written to file: output.mp3");
+};
+
 const socketAttr = new Map();
 const broadcastRoom = (socket: Socket, msg: string, cmd: boolean = false) => {
     return new Promise((resolve, reject) => {
@@ -27,6 +58,7 @@ const broadcastRoom = (socket: Socket, msg: string, cmd: boolean = false) => {
                 })
                 .then(() => {
                     if (!cmd) {
+                        let t = "";
                         socket.broadcast
                             .to(socketAttr.get(socket.id).room)
                             .emit("send msg", {
@@ -34,6 +66,29 @@ const broadcastRoom = (socket: Socket, msg: string, cmd: boolean = false) => {
                                 msg: msg,
                                 date: Date.now()
                             });
+                        tts(
+                            "sender, " +
+                                socketAttr.get(socket.id).name +
+                                ", message, " +
+                                msg
+                        ).then(result => {
+                            // let stream = ss.createStream();
+                            // let filename = path.join(
+                            //     __dirname,
+                            //     "..",
+                            //     "output.mp3"
+                            // );
+                            socket.broadcast
+                                .to(socketAttr.get(socket.id).room)
+                                .emit("tts", {
+                                    sender: socketAttr.get(socket.id).name,
+                                    audio: new Buffer(
+                                        result,
+                                        "binary"
+                                    ).toString("base64"),
+                                    date: Date.now()
+                                });
+                        });
                     } else {
                         websocket
                             .to(socketAttr.get(socket.id).room)
