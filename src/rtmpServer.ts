@@ -1,4 +1,5 @@
 const NodeMediaServer = require("node-media-server");
+import logger from "./config/winston";
 import path from "path";
 import dotenv from "dotenv";
 if (process.env.NODE_ENV !== "production") {
@@ -15,7 +16,50 @@ config.trans.ffmpeg = process.env.FFMPEG;
 
 const nms = new NodeMediaServer(config);
 //nms.run();
+nms.on("prePublish", (id: any, StreamPath: any, args: any) => {
+    logger.debug(
+        "[NodeEvent on prePublish]" +
+            `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`
+    );
+    // let session = nms.getSession(id);
+    // session.reject();
+});
 
+nms.on("postPublish", (id: any, StreamPath: any, args: any) => {
+    logger.debug(
+        "[NodeEvent on postPublish]" +
+            `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`
+    );
+});
+
+nms.on("donePublish", (id: any, StreamPath: any, args: any) => {
+    logger.debug(
+        "[NodeEvent on donePublish]" +
+            `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`
+    );
+});
+nms.on("prePlay", (id: any, StreamPath: any, args: any) => {
+    logger.debug(
+        "[NodeEvent on prePlay]" +
+            `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`
+    );
+    // let session = nms.getSession(id);
+    // session.reject();
+});
+
+nms.on("postPlay", (id: any, StreamPath: any, args: any) => {
+    logger.debug(
+        "[NodeEvent on postPlay]" +
+            `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`
+    );
+});
+
+nms.on("donePlay", (id: any, StreamPath: any, args: any) => {
+    logger.debug(
+        "[NodeEvent on donePlay]" +
+            `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`
+    );
+});
 export default nms;
 /**
  * TEST CMD COMMAND
