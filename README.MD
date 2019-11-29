@@ -40,27 +40,34 @@
 -   NODE_ENV
     development || test || deploy ...
 
+-   EXPRESS_PORT
+
+_node-media-server_
+
+-   RTMP_PORT
+-   HTTP_PORT
+
 ## Server Route
 
 ```
 (index page)
 ├──── /signin (user login)
 ├──── /signup (user sign up)
-│     [Require Json WebToken]
+[       Require Json WebToken       ]
 ├──── /logout (user logout)
 ├──── /tl (google translate api)
 └──── /navi (kakao maps api)
 ```
 
 ```
-[Require Json WebToken]
+[       Require Json WebToken     ]
 /member
 ├──── /info (info view)
 └──── /modify (POST info modify)
 ```
 
 ```
-[Require Json WebToken]
+[       Require Json WebToken       ]
 /admin
 └──── /menu
       │ /admin
@@ -83,6 +90,11 @@
 ```
 src
 ├──── config (private config files...like env...)
+│    └──── winstone.ts (Logger module)
+├──── [log] (Process log out put...)
+├──── [media] (Stream server output directory)
+│    └──── [live] (Stream output app config directory)
+│         └──── [STREAM_ID] (Stream ID output directory)
 ├──── middlewares (middleware module)
 │    ├──── Some
 │    ├──── Thing
@@ -111,6 +123,8 @@ src
 │         ├──── index.ts
 │         ├──── Some.ts
 │         └──── Module.ts
+├──── socket (Socket.io modules, middlewares..etc)
+├──── [uploads]
 ├──── utils (Util modules)
 ├──── views (view files like html...)
 │    ├──── Some
@@ -120,7 +134,9 @@ src
 │         └──── Directory
 [.env] (environment files - dotenv library, Don't commit this file)
 app.ts (Express server)
+rtmpServer.ts (node-media-server transmuxing server file)
 sequelize.ts (Sequelize-typescript Configuration file)
+webSocket.ts (Socket.io middle ware root index file)
 ```
 
 ## Configuration files
@@ -179,3 +195,35 @@ sequelize.ts (Sequelize-typescript Configuration file)
 
 > sequelize (native)
 > https://sequelize.org/v5/
+
+## Socket.io
+
+https://socket.io/
+
+## node-media-server
+
+https://github.com/illuspas/Node-Media-Server
+
+### construction
+
+rtmp-server
+
+-   rtmp-handshake
+-   rtmp-session
+-   rtmp-connect
+-   rtmp-disconnect
+-   rtmp-error
+
+http-server
+
+-   Express
+-   Websocket
+-   etc...
+
+transmuxing
+
+-   node exec ffmpeg command...
+
+### ffmpeg
+
+https://ffmpeg.org/
