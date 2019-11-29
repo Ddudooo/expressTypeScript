@@ -5,6 +5,7 @@ import { Token } from "../models/member";
 import { sequelize } from "../sequelize";
 import { Transaction } from "sequelize/types";
 
+import logger from "../config/winston";
 /**
  * 유저 토큰 확인 미들 웨어
  */
@@ -65,9 +66,8 @@ export function loginCheck(req: Request, res: Response, next: NextFunction) {
                 res.redirect(req.originalUrl);
             })
             .catch(err => {
-                console.log("FAIL TO REFRESH");
-                console.error(err);
-                console.error(e);
+                logger.warn("FAIL TO REFRESH");
+                logger.warn(err);
                 next(createError(401));
             });
     }
@@ -78,13 +78,13 @@ export function isLoginRedirect(
     res: Response,
     next: NextFunction
 ) {
-    console.log("IS LOGIN?");
+    logger.info("IS LOGIN?");
     let loginCheck = req.cookies["test.sign"];
     if (loginCheck !== undefined) {
         //login check...
         res.redirect("/member/info");
     }
-    console.log("NO");
+    logger.info("NO");
     next();
 }
 

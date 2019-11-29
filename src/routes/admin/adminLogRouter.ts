@@ -7,6 +7,8 @@ import {
 } from "../../models/admin";
 import moment from "moment";
 
+import logger from "../../config/winston";
+
 const router = express.Router();
 
 router.all("/menu/admin/list", (req: Request, res: Response) => {
@@ -33,14 +35,14 @@ router.all("/menu/admin/list", (req: Request, res: Response) => {
                     moment: moment
                 },
                 (err, html) => {
-                    if (err) console.log(err);
+                    if (err) logger.debug(err);
                     res.send(html);
                 }
             );
             return;
         })
         .catch((err: any) => {
-            console.error(err);
+            logger.warn(err);
             res.status(500).redirect("/");
         });
 });
@@ -75,7 +77,7 @@ router.all("/menu/admin/token/list", (req: Request, res: Response) => {
             return;
         })
         .catch((err: any) => {
-            console.error(err);
+            logger.warn(err);
             res.status(500).redirect("/");
         });
 });
@@ -115,13 +117,13 @@ router.all("/menu/admin/log/login", (req: Request, res: Response) => {
                     moment: moment
                 },
                 (err, html) => {
-                    if (err) console.error(err);
+                    if (err) logger.debug(err);
                     res.send(html);
                 }
             );
         })
         .catch(err => {
-            console.error(err);
+            logger.warn(err);
             throw err;
         });
 });
@@ -161,13 +163,13 @@ router.all("/menu/admin/log/action", (req: Request, res: Response) => {
                     moment: moment
                 },
                 (err, html) => {
-                    if (err) console.error(err);
+                    if (err) logger.debug(err);
                     res.send(html);
                 }
             );
         })
         .catch(err => {
-            console.error(err);
+            logger.warn(err);
             throw err;
         });
 });

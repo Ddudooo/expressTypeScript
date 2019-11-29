@@ -1,12 +1,13 @@
 import express, { Request, Response, NextFunction } from "express";
+import logger from "../../config/winston";
 
 const router = express.Router();
 
 router.get("/socket", (req: Request, res: Response) => {
-    console.log("SOCKET TEST ROUTER");
+    logger.debug("SOCKET TEST ROUTER");
     res.render("test/socketTest", (err: any, html: string) => {
         if (err) {
-            console.error(err);
+            logger.error(err);
             res.status(500).end();
         } else {
             res.status(200).send(html);

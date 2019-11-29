@@ -16,6 +16,8 @@ import { translateText } from "../utils/translateUtils/translateGoogle";
 
 import { Op } from "sequelize";
 
+import logger from "../config/winston";
+
 /**
  * 기본 경로 라우팅
  * 너무 길어져서 분리 예정
@@ -25,7 +27,7 @@ const router = express.Router();
 
 router.all("/", (req: Request, res: Response) => {
     if (req.cookies["test.sign"]) {
-        console.log("TOKEN DETECTED");
+        logger.debug("TOKEN DETECTED");
         res.status(200).render("index");
     }
     res.status(200).render("index");
@@ -39,8 +41,6 @@ router.post(
     "/signup",
     isLoginRedirect,
     async (req: Request, res: Response, next: NextFunction) => {
-        console.log("SIGN UP DATA");
-        console.log(req.body);
         try {
             await Member.create({
                 userId: req.body["signup-id"],
@@ -48,8 +48,8 @@ router.post(
                 nickName: req.body["signup-nickName"]
             });
         } catch (e) {
-            console.log("FAIL TO CREATE USER");
-            console.error(e);
+            logger.warn("FAIL TO CREATE USER");
+            logger.warn(e);
             next(e);
         }
         res.status(200).redirect("/");
@@ -58,11 +58,11 @@ router.post(
 
 router.get("/signin", isLoginRedirect, (req: Request, res: Response) => {
     if (req.headers["referer"]) {
-        console.log("REQUEST REFERER - " + req.headers["referer"]);
+        logger.debug("REQUEST REFERER - " + req.headers["referer"]);
         res.setHeader("referer", req.headers["referer"]);
     }
-    console.log(req.headers["referer"]);
-    console.log(res.getHeader("referer"));
+    logger.debug(req.headers["referer"]);
+    logger.debug(res.getHeader("referer"));
     res.render("member/signin");
 });
 
@@ -70,10 +70,11 @@ router.post(
     "/signin",
     isLoginRedirect,
     (req: Request, res: Response, next: NextFunction) => {
-        console.log(
-            "SIGN IN REQUEST\nIPADDRESS [%s]\nREQUEST URI [%s]",
-            req.headers["x-forwarded-for"] || req.connection.remoteAddress,
-            req.headers["referer"] || req.url
+        logger.debug(
+            `SIGN IN REQUEST\n` +
+                `IPADDRESS [${req.headers["x-forwarded-for"] ||
+                    req.connection.remoteAddress}]\n` +
+                `REQUEST URI [${req.headers["referer"] || req.url}]`
         );
         /**
          * 트랜잭션 부분이 프로미스로 구현되어 있음.
@@ -164,11 +165,11 @@ router.post(
             })
             .then((result: any) => {
                 //commit
-                console.log("REFERER > " + req.headers["referer"] || "/");
+                logger.debug("REFERER > " + req.headers["referer"] || "/");
             })
             .catch((err: any) => {
-                console.log("FAIL LOGIN");
-                console.error(err);
+                logger.warn("FAIL LOGIN");
+                logger.warn(err);
                 res.setHeader("referer", req.headers["referer"] || "/");
             })
             .finally(() => {
@@ -203,7 +204,7 @@ router.get(
                 res.redirect("/");
             })
             .catch(err => {
-                console.error(err);
+                logger.warn(err);
                 next(createError(401));
             });
     }
@@ -240,7 +241,7 @@ router.get(
                 throw new Error("NOT FOUND USER");
             })
             .catch(err => {
-                console.error(err);
+                logger.warn(err);
                 res.status(500).redirect("/");
             });
     }
@@ -258,7 +259,7 @@ router.post(
 
 // TEST
 router.get("/tl", loginCheck, (req: Request, res: Response) => {
-    //console.log(LANGUAGE_BY_LOCALE);
+    //logger.info(LANGUAGE_BY_LOCALE);
     const localMap = new Map(Object.entries(LANGUAGE_BY_LOCALE));
     res.render("translate", { locals: localMap });
 });
@@ -276,7 +277,7 @@ router.post("/tl", loginCheck, (req: Request, res: Response) => {
     params[2] += req.body["question"];
     translateText(params[0], params[1], params[2])
         .then((t: any) => {
-            // console.log(t);
+            // logger.info(t);
             try {
                 // let result = JSON.parse(t);
                 // let output = result[0];
@@ -288,13 +289,13 @@ router.post("/tl", loginCheck, (req: Request, res: Response) => {
                 }
                 return res.send(translateQuestion.join("\n"));
             } catch (e) {
-                //console.error(e);
-                // console.log(result);
+                //logger.error(e);
+                // logger.info(result);
                 throw new Error(e);
             }
         })
         .catch(err => {
-            console.error(err);
+            logger.warn(err);
             return res
                 .status(500)
                 .send(`FAIL TRANSLAGE PARAM ${params.join(" ")}`);

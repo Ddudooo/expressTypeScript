@@ -5,10 +5,16 @@ import path from "path";
 import session, * as expressSession from "express-session";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
+//logger
+import logger from "./config/winston";
 import morgan from "morgan";
 //routers
 import indexRouter from "./routes/indexRouter";
-import { webAPITestRouter, webSocketRouter } from "./routes/webAPI";
+import {
+    webAPITestRouter,
+    webSocketRouter,
+    webStreamRouter
+} from "./routes/webAPI";
 import { naviRouter } from "./routes/navi";
 import {
     adminMemberRouter,
@@ -16,12 +22,10 @@ import {
     adminAdminRouter
 } from "./routes/admin";
 //lib
+import nms from "./rtmpServer";
 import io, { Socket } from "socket.io";
-import {
-    chkTokenMiddleware,
-    setNickNameMiddleware,
-    connection
-} from "./webSocket";
+import { connection } from "./webSocket";
+import { chkTokenMiddleware, setNickNameMiddleware } from "./socket";
 import http from "http";
 import { sequelize } from "./sequelize";
 import nodeRSA from "node-rsa";
@@ -33,7 +37,8 @@ import { adminLoginCheck } from "./middlewares/adminCheck";
 import { loginCheck } from "./middlewares";
 
 dotenv.config({ path: path.resolve(__dirname, ".env") });
-
+const PORT: number = Number(process.env.EXPRESS_PORT || 5000);
+const HOST: string = String(process.env.EXPRESS_HOST || "0.0.0.0");
 // RSA-512 KEY CHECK
 if (
     !fs.existsSync(path.join(__dirname, "config", "ServerPublicKey.pem")) &&
@@ -55,7 +60,7 @@ if (
             { encoding: "utf8", flag: "wx" }
         );
     } catch (e) {
-        console.error(e);
+        logger.error(e);
     }
 }
 
@@ -71,7 +76,11 @@ app.engine("html", require("ejs").renderFile);
 app.set("view engine", "html");
 
 //Logger middle ware
-app.use(morgan("dev"));
+app.use(
+    morgan(process.env.NODE_ENV === "development" ? "dev" : "tiny", {
+        stream: logger.stream
+    })
+);
 
 //Body parser, Cookie parser middleware
 app.use(bodyParser.json());
@@ -99,8 +108,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
             res.setHeader("Content-language", req.query["lang"]);
         }
     } catch (err) {
-        console.error(err);
-        console.log("FAIL TO LOCAL MIDDLEWARE");
+        logger.error(err);
+        logger.warn("FAIL TO LOCAL MIDDLEWARE");
     }
     next();
 });
@@ -109,7 +118,9 @@ app.use("", indexRouter);
 
 app.use("/navi", naviRouter);
 app.use("/test", webAPITestRouter);
+app.use("/test", webStreamRouter);
 app.use("/test", loginCheck, webSocketRouter);
+
 //admin routing
 app.use("/admin", adminLoginRouter);
 app.use("/admin", adminLoginCheck, adminMemberRouter);
@@ -136,7 +147,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 
         //return res.render("unAuthorized");
         res.setHeader("referer", req.url);
-        console.log("ERROR HANDLED UNAUTHORIZED");
+        logger.warn(req.ip + " ERROR HANDLED UNAUTHORIZED");
         if (req.url.indexOf("admin") >= 0) {
             return res.render("admin/signin");
         } else {
@@ -156,9 +167,9 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     res.render("error");
 });
 
-server.listen(5000, "0.0.0.0", () => {
-    console.log(
-        "Server Start\nSERVER LISTENING PORT 5000\nSERVER LISTENING HOST 0.0.0.0"
+server.listen(PORT, HOST, () => {
+    logger.info(
+        `EXPRESS SERVER START\nSERVER LISTENING PORT ${PORT}\nSERVER LISTENING HOST ${HOST}`
     );
 });
 //export default app;
@@ -172,3 +183,6 @@ server.listen(5000, "0.0.0.0", () => {
 websocket.use((socket, next) => chkTokenMiddleware(socket, next));
 websocket.use((socket, next) => setNickNameMiddleware(socket, next));
 websocket.on("connection", socket => connection(socket));
+
+//RTMP MEDIA_SERVER
+nms.run();

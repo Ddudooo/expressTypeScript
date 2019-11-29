@@ -11,6 +11,8 @@ import { payloadJWT, createJWT, disableJWT } from "../../utils/tokenUtils";
 import { adminLoginCheck } from "../../middlewares/adminCheck";
 import createError from "http-errors";
 
+import logger from "../../config/winston";
+
 const router = express.Router();
 
 router.get("/signin", (req: Request, res: Response) => {
@@ -18,7 +20,7 @@ router.get("/signin", (req: Request, res: Response) => {
 });
 
 router.post("/signin", (req: Request, res: Response) => {
-    console.log(
+    logger.debug(
         "SIGN IN REQUEST\nIPADDRESS [%s]\nREQUEST URI [%s]",
         req.headers["x-forwarded-for"] || req.connection.remoteAddress,
         req.headers["referer"] || req.url
@@ -92,7 +94,7 @@ router.post("/signin", (req: Request, res: Response) => {
             log.set("confirm", true);
         })
         .catch(err => {
-            console.error(err);
+            logger.warn(err);
             log.set("tokenIdx", null);
             log.set("confirm", false);
             res.clearCookie("test.admin.sign");
@@ -165,7 +167,7 @@ router.all(
                 res.redirect("/admin/signin");
             })
             .catch(err => {
-                console.error(err);
+                logger.warn(err);
                 res.setHeader("referer", req.url);
                 next(createError(401));
             });

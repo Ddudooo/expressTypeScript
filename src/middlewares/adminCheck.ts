@@ -5,6 +5,7 @@ import { Transaction } from "sequelize/types";
 import { verifyJWT, refreshToken } from "../utils/tokenUtils";
 import { AdminToken, Admin, AdminActionLog } from "../models/admin";
 
+import logger from "../config/winston";
 /**
  * 어드민 토큰 확인 미들 웨어
  */
@@ -81,9 +82,8 @@ export function adminLoginCheck(
                 res.redirect(req.originalUrl);
             })
             .catch(err => {
-                console.log("FAIL TO REFRESH");
-                console.error(err);
-                console.error(e);
+                logger.warn("FAIL TO REFRESH");
+                logger.warn(err);
                 res.setHeader("referer", req.originalUrl);
                 next(createError(401));
             });
@@ -95,12 +95,12 @@ export function isLoginRedirect(
     res: Response,
     next: NextFunction
 ) {
-    console.log("IS LOGIN?");
+    logger.info("IS LOGIN?");
     let loginCheck = req.cookies["test.admin.sign"];
     if (loginCheck !== undefined) {
         //login check...
         res.redirect("/");
     }
-    console.log("NO");
+    logger.info("NO");
     next();
 }

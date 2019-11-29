@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Video TEST</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                background: #333;
+                color: #eee;
+                height: 100%;
+                font: 13px Helvetica, Arial;
+            }
+            #stream-video {
+                width: 80%;
+            }
+        </style>
+        <link href="https://vjs.zencdn.net/7.5.5/video-js.css" rel="stylesheet" />
+        <script src="/js/jquery-3.4.1.min.js"></script>
+        <!-- If you'd like to support IE8 (for Video.js versions prior to v7) -->
+        <script src="https://vjs.zencdn.net/ie8/1.1.2/videojs-ie8.min.js"></script>
+        <script src="https://vjs.zencdn.net/7.5.5/video.js"></script>
+        <!-- <script src="/js/videojs-http-streaming.min.js"></script> -->
+    </head>
+    <body>
+        <video id="stream-video" class="video-js vjs-live vjs-liveui vjs-default-skin" preload="auto" controls>
+            <source src="http://localhost:3000/live/test/index.m3u8" type="application/x-mpegURL" />
+        </video>
+        <script>
+            var player = videojs("stream-video", {
+                liveui: true,
+                techOrder: ["html5"]
+            });
+            player.play();
+
+            player.on("error", function(e) {
+                console.log("ERROR ", e);
+            });
+            player.ready(function() {
+                player.tech().on("retryplaylist", () => {
+                    setTimeout(function() {
+                        player.load();
+                    }, 5000);
+                });
+            });
+        </script>
+    </body>
+</html>

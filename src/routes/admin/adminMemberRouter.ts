@@ -6,6 +6,8 @@ import path from "path";
 import fx from "../../utils/iteratorUtils";
 import { ChatLog } from "../../models/websocket";
 
+import logger from "../../config/winston";
+
 const addStr = (a: any, b: any) => a + "" + b;
 
 const router = express.Router();
@@ -34,7 +36,7 @@ router.get("/menu/member/list", (req: Request, res: Response) => {
             return;
         })
         .catch(err => {
-            console.error(err);
+            logger.warn(err);
             createHttpError(500);
         });
 });
@@ -67,13 +69,13 @@ router.all("/menu/member/token/list", (req: Request, res: Response) => {
                     moment: moment
                 },
                 (err, html) => {
-                    if (err) console.error(err);
+                    if (err) logger.debug(err);
                     res.send(html);
                 }
             );
         })
         .catch(err => {
-            console.error(err);
+            logger.warn(err);
             throw err;
         });
 });
@@ -111,13 +113,13 @@ router.all("/menu/member/log/login", (req: Request, res: Response) => {
                     moment: moment
                 },
                 (err, html) => {
-                    if (err) console.error(err);
+                    if (err) logger.debug(err);
                     res.send(html);
                 }
             );
         })
         .catch(err => {
-            console.error(err);
+            logger.warn(err);
             throw err;
         });
 });
@@ -150,13 +152,13 @@ router.all("/menu/member/log/chat", (req: Request, res: Response) => {
                     moment: moment
                 },
                 (err, html) => {
-                    if (err) console.error(err);
+                    if (err) logger.debug(err);
                     res.send(html);
                 }
             );
         })
         .catch(err => {
-            console.error(err);
+            logger.warn(err);
             throw err;
         });
 });
@@ -182,7 +184,7 @@ router.all("/menu/member/log/chat/preview", (req: Request, res: Response) => {
             }
         })
         .catch(err => {
-            console.error(err);
+            logger.warn(err);
             return res.status(500).send(err);
         });
 });

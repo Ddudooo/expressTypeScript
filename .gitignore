@@ -3,4 +3,11 @@ node_modules
 src/.env
 src/config/**/*
 src/upload/**/*
+src/upload/
+src/media/**/*
+src/media/
+src/log/**/*
+src/log/
 dist
+
+!src/config/winston.ts

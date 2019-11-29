@@ -1,3 +1,4 @@
 import webAPITestRouter from "./webAPITestRouter";
 import webSocketRouter from "./webSocketRouter";
-export { webAPITestRouter, webSocketRouter };
+import webStreamRouter from "./webStreamRouter";
+export { webAPITestRouter, webSocketRouter, webStreamRouter };

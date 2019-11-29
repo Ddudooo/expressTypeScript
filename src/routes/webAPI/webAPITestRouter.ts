@@ -4,6 +4,7 @@ import path from "path";
 import fs from "fs";
 import multer from "multer";
 import ffmepg from "fluent-ffmpeg";
+import logger from "../../config/winston";
 //import * as speech from "@google-cloud/speech";
 var FfmpegCommand = require("fluent-ffmpeg");
 var command = new FfmpegCommand();
@@ -15,7 +16,7 @@ const upload = multer({ dest: path.join(__dirname, "..", "..", "uploads") });
  * 기능이 없음.
  */
 router.get("/media", (req: Request, res: Response) => {
-    console.log("HTML5 MEDIA TEST PAGE");
+    logger.info("HTML5 MEDIA TEST PAGE");
     res.render("test/html5Media");
 });
 
@@ -23,9 +24,9 @@ router.post(
     "/media",
     upload.single("uploadFile"),
     async (req: Request, res: Response) => {
-        console.log("media file upload test");
+        logger.info("media file upload test");
         //req.file .
-        console.log(req.file);
+        logger.info(req.file);
         const client = new speech.SpeechClient();
         const file = fs.readFileSync(req.file.path);
         const audioBytes = file.toString("base64");
@@ -49,9 +50,9 @@ router.post(
             const transcription = response.results
                 .map((result: any) => result.alternatives[0].transcript)
                 .join("\n");
-            console.log(`Transcription: ${transcription}`);
+            logger.info(`Transcription: ${transcription}`);
         } catch (e) {
-            console.error(e);
+            logger.error(e);
         } finally {
             return res.status(200).end();
         }
@@ -59,16 +60,16 @@ router.post(
         ffmepg(req.file.path)
             .format("flac")
             .on("error", err => {
-                console.error(err);
+                logger.error(err);
                 return res.status(500).send(err);
             })
             .on("end", async () => {
-                console.log(req.file.originalname + " CONVERT SUCCESS!");
+                logger.info(req.file.originalname + " CONVERT SUCCESS!");
             })
             .saveToFile(
                 path.join(__dirname, "..", "..", "uploads", "convert.flac")
             );
-        console.log("async function?");
+        logger.info("async function?");
 
         /*
     const client = new speech.SpeechClient();
@@ -101,7 +102,7 @@ router.post(
         const transcription = response.results
         .map(result => result.alternatives[0].transcript)
         .join('\n');
-        console.log(`Transcription: ${transcription}`);
+        logger.info(`Transcription: ${transcription}`);
         */
     }
 );
