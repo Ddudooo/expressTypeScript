@@ -28,7 +28,7 @@ const router = express.Router();
 router.all("/", (req: Request, res: Response) => {
     if (req.cookies["test.sign"]) {
         logger.debug("TOKEN DETECTED");
-        res.status(200).render("index");
+        return res.status(200).render("index", { login: true });
     }
     res.status(200).render("index");
 });

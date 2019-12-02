@@ -16,7 +16,6 @@ const upload = multer({ dest: path.join(__dirname, "..", "..", "uploads") });
  * 기능이 없음.
  */
 router.get("/media", (req: Request, res: Response) => {
-    logger.info("HTML5 MEDIA TEST PAGE");
     res.render("test/html5Media");
 });
 
@@ -24,9 +23,9 @@ router.post(
     "/media",
     upload.single("uploadFile"),
     async (req: Request, res: Response) => {
-        logger.info("media file upload test");
+        logger.debug("media file upload test");
         //req.file .
-        logger.info(req.file);
+        logger.debug(req.file);
         const client = new speech.SpeechClient();
         const file = fs.readFileSync(req.file.path);
         const audioBytes = file.toString("base64");
@@ -50,7 +49,7 @@ router.post(
             const transcription = response.results
                 .map((result: any) => result.alternatives[0].transcript)
                 .join("\n");
-            logger.info(`Transcription: ${transcription}`);
+            logger.debug(`Transcription: ${transcription}`);
         } catch (e) {
             logger.error(e);
         } finally {

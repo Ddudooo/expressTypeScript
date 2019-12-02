@@ -5,57 +5,29 @@
     </head>
     <body>
         <h2>TEST PAGE</h2>
-        <script src="/socket.io/socket.io.js"></script>
-        <script>
-            var socket = io("http://localhost:5000");
-            var msgList = document.getElementById("messages");
-            socket.on("news", function(data) {
-                console.log(data);
-                socket.emit("my other event", { my: "data" });
-            });
-            socket.on("send msg", function(data) {
-                addMsg(data);
-            });
-            socket.on("disconnect", function(reason) {
-                console.log(reason);
-                addMsg("Connection disconnect...");
-            });
-            function sendMsg() {
-                var msg = document.getElementById("msg").value;
-                if (msg.search("/") == 0) {
-                    if (msg.search("change name") == 1) {
-                        msg = msg.substring("/change name".length);
-                        changeName(msg);
-                    }
-                    if (msg.search("joinRoom") == 1) {
-                        msg = msg.substring("/joinRoom".length);
-                        joinRoom(msg);
-                    }
-                    if (msg.search("clear") == 1) {
-                        while (msgList.firstChild) {
-                            msgList.removeChild(msgList.firstChild);
-                        }
-                    }
-                } else {
-                    console.log("SEND MSG " + msg);
-                    socket.emit("send msg", { msg: msg });
-                }
-                document.getElementById("msg").value = "";
-            }
-            function addMsg(data) {
-                var newMsg = document.createElement("LI");
-                var newMsgText = document.createTextNode(
-                    data.sender + " > " + data.msg
-                );
-                newMsg.appendChild(newMsgText);
-                msgList.appendChild(newMsg);
-            }
-            function changeName(name) {
-                socket.emit("change name", { id: name });
-            }
-            function joinRoom(room) {
-                socket.emit("join Room", { room: room });
-            }
-        </script>
+        <% if(typeof login !== "undefined"){ %>
+        <div>
+            <ul>
+                <li>
+                    <a href="/test/socket">Socket chat</a>
+                </li>
+                <li>
+                    <a href="/test/stream">Stream Server</a>
+                </li>
+                <li>
+                    <a href="/test/media">Html media</a>
+                </li>
+            </ul>
+            <div>
+                <a href="/member/info">INFO</a>
+                <a href="/logout">logout</a>
+            </div>
+        </div>
+        <%} else { %>
+        <div>
+            <a href="/signin">SIGN IN</a>
+            <a href="/signup">SIGN UP</a>
+        </div>
+        <%}%>
     </body>
 </html>

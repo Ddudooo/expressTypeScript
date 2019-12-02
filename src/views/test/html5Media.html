@@ -16,6 +16,12 @@
             }
             $().ready(function() {
                 if (hasGetuserMedia()) {
+                    var audioCtx = new AudioContext();
+                    var analyser = audioCtx.createAnalyser();
+                    var distortion = audioCtx.createWaveShaper();
+                    var gainNode = audioCtx.createGain();
+                    var biquadFilter = audioCtx.createBiquadFilter();
+                    var drawVisual;
                     console.log("MEDIA API OK");
                     var player = $("#player");
                     navigator.mediaDevices
@@ -24,15 +30,65 @@
                             video: false
                         })
                         .then(function(stream) {
-                            if (window.URL) {
-                                player.src = window.URL.createObjectURL(stream);
-                            } else {
-                                player.src = stream;
-                            }
+                            console.dir(stream);
+                            var source = audioCtx.createMediaStreamSource(stream);
+                            $("#visualizer")[0].width = window.innerWidth;
+                            //$("#visualizer").height(window.innerWidth);
+                            //source.connect(gainNode);
+                            source.connect(analyser);
+                            analyser.connect(distortion);
+                            distortion.connect(biquadFilter);
+                            biquadFilter.connect(gainNode);
+                            gainNode.connect(audioCtx.destination);
+                            gainNode.gain.value = 0.02;
+                            viusalize(stream);
                         })
                         .catch(function(err) {
                             console.log(err);
                         });
+
+                    function viusalize(stream) {
+                        var canvas = $("#visualizer")[0];
+                        var WIDTH = canvas.width;
+                        var HEIGHT = canvas.height;
+                        console.log(WIDTH);
+                        console.log(HEIGHT);
+                        analyser.fftSize = 2048;
+                        var bufferLength = analyser.frequencyBinCount; // half the FFT value
+                        var dataArray = new Uint8Array(bufferLength); // create an array to store the data
+                        function draw() {
+                            drawVisual = requestAnimationFrame(draw);
+
+                            analyser.getByteTimeDomainData(dataArray); // get waveform data and put it into the array created above
+                            var canvasCtx = $("#visualizer")[0].getContext("2d");
+                            canvasCtx.fillStyle = "rgb(0, 0, 0)"; // draw wave with canvas
+                            canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
+                            canvasCtx.lineWidth = 2;
+                            canvasCtx.strokeStyle = "rgb(0, 255, 0)";
+
+                            canvasCtx.beginPath();
+
+                            var sliceWidth = (WIDTH * 1.0) / bufferLength;
+                            var x = 0;
+
+                            for (var i = 0; i < bufferLength; i++) {
+                                var v = dataArray[i] / 128.0;
+                                var y = (v * HEIGHT) / 2;
+
+                                if (i === 0) {
+                                    canvasCtx.moveTo(x, y);
+                                } else {
+                                    canvasCtx.lineTo(x, y);
+                                }
+
+                                x += sliceWidth;
+                            }
+
+                            canvasCtx.lineTo(canvas.width, canvas.height / 2);
+                            canvasCtx.stroke();
+                        }
+                        draw();
+                    }
                 } else {
                     alert("FAIL MEDIA API");
                 }
@@ -47,7 +103,7 @@
                     <input type="file" name="uploadFile" />
                     <button type="submit">upload</button>
                 </form>
-                <audio id="player" controls></audio>
+                <canvas id="visualizer" witdh="1600" height="100"></canvas>
             </div>
         </div>
     </body>
