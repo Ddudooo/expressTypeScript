@@ -1,4 +1,4 @@
-<% include ../../include/header.html %>
+<%- include('../../include/header.html') %>
     <style>
         .paging{
             text-align: center;
@@ -24,7 +24,7 @@
             color: #999;
         }
     </style>
-    <% include ../../include/listFrm.html %>
+    <%- include('../../include/listFrm.html') %>
     <script>
         var xOffset = 10;
         var yOffset = 30;
@@ -113,8 +113,8 @@
                 <!-- prettier-ignore-end -->
             </tbody>                
         </table>
-        <% include ../../include/paging.html%>
+        <%- include('../../include/paging.html') %>
         <input type="hidden" name="page" id="listPage" value="<%=page%>"/>
         </form>
     </div>
-<% include ../../include/footer.html %>
+<%- include('../../include/footer.html') %>

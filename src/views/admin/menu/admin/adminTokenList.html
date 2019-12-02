@@ -1,4 +1,4 @@
-<% include ../../include/header.html %>
+<%- include('../../include/header.html') %>
     <style>
         .paging{
             text-align: center;
@@ -11,7 +11,7 @@
             cursor: pointer;
         }
     </style>
-    <% include ../../include/listFrm.html %>
+    <%- include('../../include/listFrm.html') %>
     <h1>INFORMATION</h1>
     <h2>TOKEN LIST</h2>        
     <div>            
@@ -68,8 +68,8 @@
                 <!-- prettier-ignore-end -->
             </tbody>                
         </table>
-        <% include ../../include/paging.html %>
+        <%- include('../../include/paging.html') %>
         <input type="hidden" name="page" id="listPage" value="<%=page%>"/>
         </form>
     </div>
-<% include ../../include/footer.html %>
+<%- include('../../include/footer.html') %>
