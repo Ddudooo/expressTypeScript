@@ -21,9 +21,7 @@
                     var distortion = audioCtx.createWaveShaper();
                     var gainNode = audioCtx.createGain();
                     var biquadFilter = audioCtx.createBiquadFilter();
-                    var drawVisual;
-                    console.log("MEDIA API OK");
-                    var player = $("#player");
+
                     navigator.mediaDevices
                         .getUserMedia({
                             audio: true,
@@ -40,7 +38,7 @@
                             distortion.connect(biquadFilter);
                             biquadFilter.connect(gainNode);
                             gainNode.connect(audioCtx.destination);
-                            gainNode.gain.value = 0.02;
+
                             viusalize(stream);
                         })
                         .catch(function(err) {
@@ -89,6 +87,12 @@
                         }
                         draw();
                     }
+
+                    $("#volume").on("input", function() {
+                        console.log(this.value);
+                        gainNode.gain.value = this.value;
+                        $("#gain_value").text(this.value);
+                    });
                 } else {
                     alert("FAIL MEDIA API");
                 }
@@ -104,6 +108,14 @@
                     <button type="submit">upload</button>
                 </form>
                 <canvas id="visualizer" witdh="1600" height="100"></canvas>
+                <label>
+                    GAIN -
+                    <span id="gain_value">1</span>
+                </label>
+                <label>
+                    Volume
+                    <input type="range" id="volume" min="0" max="2" value="1" step="0.01" />
+                </label>
             </div>
         </div>
     </body>
