@@ -16,7 +16,7 @@ const upload = multer({ dest: path.join(__dirname, "..", "..", "uploads") });
  * 기능이 없음.
  */
 router.get("/media", (req: Request, res: Response) => {
-    res.render("test/html5Media");
+    res.render("wepapi/html5Media");
 });
 
 router.post(

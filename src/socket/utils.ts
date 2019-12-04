@@ -1,7 +1,7 @@
 import { Socket } from "socket.io";
 import { ChatLog } from "../models/websocket";
 import { socketAttr } from "../webSocket";
-import { websocket } from "../app";
+import { websocket } from "../bin/www";
 import { Token } from "../models/member";
 
 import logger from "../config/winston";

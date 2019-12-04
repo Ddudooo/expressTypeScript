@@ -59,6 +59,7 @@ const logger = createLogger({
     transports: [
         new transports.Console({
             level: env === "development" ? "debug" : "info",
+            silent: env === "test" ? true : false,
             format: format.combine(
                 format(function(info: any, opts: any) {
                     info.level = `[${info.level.toUpperCase()}]`;

@@ -166,14 +166,15 @@ router.post(
             .then((result: any) => {
                 //commit
                 logger.debug("REFERER > " + req.headers["referer"] || "/");
+                res.redirect(200, req.headers["referer"] || "/");
             })
             .catch((err: any) => {
                 logger.warn("FAIL LOGIN");
                 logger.warn(err);
                 res.setHeader("referer", req.headers["referer"] || "/");
+                res.redirect(401, req.headers["referer"] || "/");
             })
             .finally(() => {
-                res.redirect(req.headers["referer"] || "/");
                 log.save();
             });
     }

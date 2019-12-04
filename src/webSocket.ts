@@ -1,4 +1,4 @@
-import { websocket } from "./app";
+import { websocket } from "./bin/www";
 import io, { Socket } from "socket.io";
 //text to speech
 import fs from "fs";

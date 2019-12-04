@@ -22,23 +22,15 @@ import {
     adminAdminRouter
 } from "./routes/admin";
 //lib
-import nms from "./rtmpServer";
-import io, { Socket } from "socket.io";
-import { connection } from "./webSocket";
-import { chkTokenMiddleware, setNickNameMiddleware } from "./socket";
-import http from "http";
-import { sequelize } from "./sequelize";
+
 import nodeRSA from "node-rsa";
 import fs from "fs";
-import dotenv from "dotenv";
+
 //custom modules
 import { searchLocaleCode } from "./utils/translateUtils";
 import { adminLoginCheck } from "./middlewares/adminCheck";
 import { loginCheck } from "./middlewares";
 
-dotenv.config({ path: path.resolve(__dirname, ".env") });
-const PORT: number = Number(process.env.EXPRESS_PORT || 5000);
-const HOST: string = String(process.env.EXPRESS_HOST || "0.0.0.0");
 // RSA-512 KEY CHECK
 if (
     !fs.existsSync(path.join(__dirname, "config", "ServerPublicKey.pem")) &&
@@ -65,10 +57,6 @@ if (
 }
 
 const app = express();
-const server = http.createServer(app);
-export const websocket = io(server);
-
-sequelize.sync();
 
 //Express view engine setting
 app.set("views", path.join(__dirname, "/views"));
@@ -117,9 +105,9 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.use("", indexRouter);
 
 app.use("/navi", naviRouter);
-app.use("/test", webAPITestRouter);
-app.use("/test", webStreamRouter);
-app.use("/test", loginCheck, webSocketRouter);
+app.use("/webapi", webAPITestRouter);
+app.use("/webapi", webStreamRouter);
+app.use("/webapi", loginCheck, webSocketRouter);
 
 //admin routing
 app.use("/admin", adminLoginRouter);
@@ -148,6 +136,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
         //return res.render("unAuthorized");
         res.setHeader("referer", req.url);
         logger.warn(req.ip + " ERROR HANDLED UNAUTHORIZED");
+        res.status(401);
         if (req.url.indexOf("admin") >= 0) {
             return res.render("admin/signin");
         } else {
@@ -167,22 +156,10 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     res.render("error");
 });
 
-server.listen(PORT, HOST, () => {
-    logger.info(
-        `EXPRESS SERVER START\nSERVER LISTENING PORT ${PORT}\nSERVER LISTENING HOST ${HOST}`
-    );
-});
-//export default app;
-// const websocket = io.listen(
-//     app.listen(5000, "0.0.0.0", () => {
-//         console.log("SERVER START LISTENING PORT 5000");
-//     })
-// );
+// server.listen(PORT, HOST, () => {
+//     logger.info(
+//         `EXPRESS SERVER START\nSERVER LISTENING PORT ${PORT}\nSERVER LISTENING HOST ${HOST}`
+//     );
+// });
 
-// websocket
-websocket.use((socket, next) => chkTokenMiddleware(socket, next));
-websocket.use((socket, next) => setNickNameMiddleware(socket, next));
-websocket.on("connection", socket => connection(socket));
-
-//RTMP MEDIA_SERVER
-nms.run();
+export default app;
