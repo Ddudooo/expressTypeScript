@@ -1,29 +1,30 @@
 name: Node.js Package
 
-on: [push]
-  release:
-    types: [created]
+on:
+    push:
+        branches:
+            - master
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 12
-      - run: npm ci
-      - run: npm test
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v1
+            - uses: actions/setup-node@v1
+              with:
+                  node-version: 12
+            - run: npm ci
+            - run: npm test
 
-  build:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 12
-          registry-url: https://npm.pkg.github.com/
-          scope: 'ddudooo'
-      - run: npm ci
-      - run: npm publish
+    build:
+        needs: test
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v1
+            - uses: actions/setup-node@v1
+              with:
+                  node-version: 12
+                  registry-url: https://npm.pkg.github.com/
+                  scope: "ddudooo"
+            - run: npm ci
+            - run: npm publish
