@@ -1,4 +1,4 @@
-import chai, { expect, should } from "chai";
+import { expect } from "chai";
 //import httpMocks from "node-mocks-http";
 //const sinon = require("sinon");
 import sinon from "sinon";
@@ -6,13 +6,11 @@ import request from "supertest";
 import cheerio from "cheerio";
 import cookieParser from "cookie-parser";
 import path from "path";
-import fs from "fs";
 import dotenv from "dotenv";
 dotenv.config({ path: path.resolve(__dirname, ".test.env") });
 
 import app from "../app";
-import { Member } from "../models/member";
-import Bluebird from "bluebird";
+import { Member, LoginLog } from "../models/member";
 
 function pathCreate(
     path: string,
@@ -22,7 +20,10 @@ function pathCreate(
     return { path: path, method: method, result: result };
 }
 
-function pathTest(req: request.SuperTest<request.Test>, a: any) {
+function pathTest(
+    req: request.SuperTest<request.Test>,
+    a: { [key: string]: any }
+) {
     const aMETHOD = a.method.toUpperCase();
     if (aMETHOD === "GET") {
         return it(`URL PATH : ${a.path}`, async () => {
@@ -46,14 +47,25 @@ function pathTest(req: request.SuperTest<request.Test>, a: any) {
 describe("Express test", () => {
     const req = request(app);
     beforeEach(() => {
-        //sinon.stub(Member, "findAll").resolves(Member[])
-        //Setup fake rendering
-        // app.set("views", path.join(__dirname, "..", "views"));
-        // app.set("view engine", "ext");
-        // app.engine("ext", (path, options, callback) => {
-        //     const details = Object.assign({ path }, options);
-        //     callback(null, JSON.stringify(details));
-        // });
+        const result: Member[] = [];
+        const fakeUser = new Member({
+            idx: 0,
+            userId: "test",
+            password: "1234"
+        });
+        const tokenUtils = require("../utils/tokenUtils");
+        const fakeLog = LoginLog.build({ ipaddress: "test", reqURI: "test" });
+        result.push(fakeUser);
+        sinon.stub(Member, "findAll").resolves(result);
+        sinon
+            .stub(tokenUtils, "createJWT")
+            .resolves({ idx: 0, token: "token", exp: 0 });
+        sinon.stub(fakeUser, "checkPassword").callsFake(ps => {
+            if (ps === "1234") return true;
+            else return false;
+        });
+        sinon.stub(LoginLog, "build").returns(fakeLog);
+        sinon.stub(fakeLog, "save").resolves();
     });
     afterEach(() => {
         sinon.restore();
@@ -91,15 +103,18 @@ describe("Express test", () => {
         const cookie = res.header["set-cookie"];
         expect(cookie.indexOf("test.sign")).to.equal(-1);
     });
-    it("Login Success TEST", async () => {
-        const res = await req
-            .post("/signin")
-            .send({
-                "signin-id": "test",
-                "signin-pw": "test"
-            })
-            .expect(200);
-        const cookie = res.header["set-cookie"];
-        expect(cookie.join(",")).to.have.string("test.sign");
+    describe("Login Member TEST", () => {
+        it("Login Success TEST", async () => {
+            const res = await req
+                .post("/signin")
+                .send({
+                    "signin-id": "test",
+                    "signin-pw": "1234"
+                })
+                .expect(200);
+            const cookie = res.header["set-cookie"];
+            expect(cookie.join(",")).to.have.string("test.sign");
+        });
+        it("nothing", () => {});
     });
 });

@@ -1,5 +1,7 @@
 node_modules
 *-lock.json
+.nyc_output
+coverage
 src/.env
 src/config/**/*
 src/upload/**/*
