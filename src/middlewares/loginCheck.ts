@@ -83,6 +83,7 @@ export function isLoginRedirect(
     if (loginCheck !== undefined) {
         //login check...
         res.redirect("/member/info");
+        return;
     }
     logger.info("NO");
     next();

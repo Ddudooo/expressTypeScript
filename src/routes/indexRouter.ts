@@ -166,13 +166,14 @@ router.post(
             .then((result: any) => {
                 //commit
                 logger.debug("REFERER > " + req.headers["referer"] || "/");
-                res.redirect(200, req.headers["referer"] || "/");
+                res.redirect(req.headers["referer"] || "/");
             })
             .catch((err: any) => {
                 logger.warn("FAIL LOGIN");
                 logger.warn(err);
                 res.setHeader("referer", req.headers["referer"] || "/");
-                res.redirect(401, req.headers["referer"] || "/");
+                //res.redirect(401, req.headers["referer"] || "/");
+                next(createError(401));
             })
             .finally(() => {
                 log.save();
@@ -243,7 +244,7 @@ router.get(
             })
             .catch(err => {
                 logger.warn(err);
-                res.status(500).redirect("/");
+                next(createError(500, err));
             });
     }
 );

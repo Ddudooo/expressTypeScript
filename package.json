@@ -27,7 +27,8 @@
             "src/test/**/*"
         ],
         "reporter": [
-            "html"
+            "html",
+            "text-summary"
         ],
         "all": true
     },

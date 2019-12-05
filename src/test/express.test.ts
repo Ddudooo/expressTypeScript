@@ -10,7 +10,7 @@ import dotenv from "dotenv";
 dotenv.config({ path: path.resolve(__dirname, ".test.env") });
 
 import app from "../app";
-import { Member, LoginLog } from "../models/member";
+import { Member, LoginLog, Token } from "../models/member";
 
 function pathCreate(
     path: string,
@@ -70,7 +70,7 @@ describe("Express test", () => {
     afterEach(() => {
         sinon.restore();
     });
-    describe("Route TEST", () => {
+    describe("UnAuthorized Path", () => {
         const path = [];
         path.push(pathCreate("/", "get", { status: 200 }));
         path.push(pathCreate("/signin", "get", { status: 200 }));
@@ -79,7 +79,7 @@ describe("Express test", () => {
             pathTest(req, a);
         }
     });
-    describe("Authorize Require Path TEST", () => {
+    describe("Authorize Require Path", () => {
         const path = [];
         const expectFunc = (res: request.Response) => {
             expect(res.status).to.be.equal(401);
@@ -97,24 +97,49 @@ describe("Express test", () => {
             pathTest(req, a);
         }
     });
-    it("Login Fail TEST", async () => {
-        cookieParser();
-        const res = await req.post("/signin").expect(401);
-        const cookie = res.header["set-cookie"];
-        expect(cookie.indexOf("test.sign")).to.equal(-1);
-    });
-    describe("Login Member TEST", () => {
-        it("Login Success TEST", async () => {
+    describe("Login Member", () => {
+        it("Login Fail", async () => {
+            const res = await req.post("/signin").expect(401);
+            const cookie = res.header["set-cookie"];
+            expect(cookie.indexOf("test.sign")).to.equal(-1);
+        });
+
+        it("Login Success", async () => {
             const res = await req
                 .post("/signin")
                 .send({
                     "signin-id": "test",
                     "signin-pw": "1234"
                 })
-                .expect(200);
+                .expect(302);
             const cookie = res.header["set-cookie"];
             expect(cookie.join(",")).to.have.string("test.sign");
         });
-        it("nothing", () => {});
+
+        it("URL PATH : /member/info", async () => {
+            const tokenUtils = require("../utils/tokenUtils");
+            sinon.stub(tokenUtils, "verifyJWT").callsFake(() => "accesstoken");
+            sinon
+                .stub(Token, "findAll")
+                .resolves([new Token({ memberIdx: 0 })]);
+            sinon.stub(Member, "findByPk").resolves(
+                new Member({
+                    idx: 0,
+                    userId: "test",
+                    password: "1234"
+                })
+            );
+            const res = await req
+                .get("/member/info")
+                .set("Cookie", "test.sign=acc;test.refresh=ref")
+                .expect(200);
+
+            const $ = cheerio.load(res.text);
+            const bodyTitle = $("h2")
+                .first()
+                .text();
+            expect(bodyTitle).to.not.equal("SIGN IN");
+            sinon.restore();
+        });
     });
 });
