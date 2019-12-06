@@ -61,8 +61,6 @@ router.get("/signin", isLoginRedirect, (req: Request, res: Response) => {
         logger.debug("REQUEST REFERER - " + req.headers["referer"]);
         res.setHeader("referer", req.headers["referer"]);
     }
-    logger.debug(req.headers["referer"]);
-    logger.debug(res.getHeader("referer"));
     res.render("member/signin");
 });
 
@@ -115,6 +113,7 @@ router.post(
                     transaction: t
                 })
                     .then((result: Member[]) => {
+                        console.log("TEST");
                         if (result.length > 0) {
                             loginUser = result[0];
                             log.set("memberIdx", loginUser.idx);

@@ -1,6 +1,10 @@
 #!/usr/bin/env node
 "use strict";
-
+import dotenv from "dotenv";
+import path from "path";
+if (process.env.NODE_ENV !== "production") {
+    dotenv.config({ path: path.resolve(__dirname, "..", ".env") });
+}
 //module dependencies.
 import app from "../app";
 import { sequelize } from "../sequelize";
@@ -10,12 +14,6 @@ import io, { Socket } from "socket.io";
 import { connection } from "../webSocket";
 import { chkTokenMiddleware, setNickNameMiddleware } from "../socket";
 import http from "http";
-import path from "path";
-import dotenv from "dotenv";
-
-if (process.env.NODE_ENV !== "production") {
-    dotenv.config({ path: path.resolve(__dirname, "..", ".env") });
-}
 
 const port = normalizePort(process.env.EXPRESS_PORT || 5000);
 
