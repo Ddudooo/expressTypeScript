@@ -113,7 +113,6 @@ router.post(
                     transaction: t
                 })
                     .then((result: Member[]) => {
-                        console.log("TEST");
                         if (result.length > 0) {
                             loginUser = result[0];
                             log.set("memberIdx", loginUser.idx);

@@ -25,7 +25,7 @@ jobs:
               with:
                   node-version: 12
             - run: npm i
-            - run: npm test
+            - run: npm test -- --reporter min
               id: test
               env:
                   NODE_ENV: test
