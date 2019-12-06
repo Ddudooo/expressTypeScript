@@ -1,0 +1,71 @@
+name: Node.js Package
+
+on:
+    push:
+        branches:
+            - master
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        services:
+            mariadb:
+                image: mariadb:latest
+                ports:
+                    - 3306
+                env:
+                    MYSQL_USER: test
+                    MYSQL_PASSWORD: 1234
+                    MYSQL_ROOT_PASSWORD: 1234
+                    MYSQL_DATABASE: test
+                options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+        steps:
+            - uses: actions/checkout@v1
+            - uses: actions/setup-node@v1
+              with:
+                  node-version: 12
+            - run: npm i
+            - run: npm test
+              id: test
+              env:
+                  NODE_ENV: test
+                  MYSQL_HOST: 127.0.0.1
+                  DB_DIALECT: mysql
+                  DB_TIMEZONE: +09:00
+                  MYSQL_CHARSET: utf8
+                  MYSQL_COLLATE: utf8_general_ci
+            - name: Notify test fail!
+              if: steps.test.outputs.status != 'success'
+              uses: ddudooo/request@master
+              with:
+                  METHOD: POST
+                  Headers: '{"Content-type":"application/json"}'
+                  URL: https://wh.jandi.com/connect-api/webhook/20451546/b1390a50f460494ebff3174f3a0c6719
+                  data: '{
+                    "body": "[[Github]](http://github.com/ddudooo/expressTypescript) Test Fail",
+                    "connectColor": "#FF5555"                    
+                  }'
+                
+
+    build:
+        needs: test
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v1
+            - uses: actions/setup-node@v1
+              with:
+                  node-version: 12
+                  registry-url: https://npm.pkg.github.com/
+                  scope: "ddudooo"
+            - run: npm i
+            - run: npm build
+            - name: Webhook
+              uses: ddudooo/request@master
+              with:
+                  METHOD: POST
+                  Headers: '{"Content-type":"application/json"}'
+                  URL: https://wh.jandi.com/connect-api/webhook/20451546/b1390a50f460494ebff3174f3a0c6719
+                  data: '{
+                    "body": "[[Github]](http://github.com/ddudooo/expressTypescript) Build Success",
+                    "connectColor": "#FAC11B"                    
+                  }'
