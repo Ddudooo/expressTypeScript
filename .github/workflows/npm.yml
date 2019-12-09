@@ -30,21 +30,15 @@ jobs:
               env:
                   NODE_ENV: test
                   MYSQL_HOST: 127.0.0.1
+                  MYSQL_USER: test
+                  MYSQL_PASSWORD: 1234
+                  MYSQL_ROOT_PASSWORD: 1234
+                  MYSQL_DATABASE: test
+                  MYSQL_PORT: ${{ job.services.mariadb.ports['3306'] }}
                   DB_DIALECT: mysql
                   DB_TIMEZONE: +09:00
                   MYSQL_CHARSET: utf8
                   MYSQL_COLLATE: utf8_general_ci
-            - name: Notify test fail!              
-              uses: ddudooo/request@master
-              with:
-                  METHOD: POST
-                  Headers: '{"Content-type":"application/json"}'
-                  URL: https://wh.jandi.com/connect-api/webhook/20451546/b1390a50f460494ebff3174f3a0c6719
-                  data: '{
-                    "body": "[[Github]](http://github.com/ddudooo/expressTypescript) ${{steps.test.outputs.status}}",
-                    "connectColor": "#FF5555"                    
-                  }'
-                
 
     build:
         needs: test
@@ -58,13 +52,3 @@ jobs:
                   scope: "ddudooo"
             - run: npm i
             - run: npm build
-            - name: Webhook
-              uses: ddudooo/request@master
-              with:
-                  METHOD: POST
-                  Headers: '{"Content-type":"application/json"}'
-                  URL: https://wh.jandi.com/connect-api/webhook/20451546/b1390a50f460494ebff3174f3a0c6719
-                  data: '{
-                    "body": "[[Github]](http://github.com/ddudooo/expressTypescript) Build Success",
-                    "connectColor": "#FAC11B"                    
-                  }'
