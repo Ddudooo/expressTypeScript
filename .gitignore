@@ -2,7 +2,6 @@ node_modules
 *-lock.json
 .nyc_output
 coverage
-src/.env
 src/config/**/*
 src/upload/**/*
 src/upload/
@@ -11,5 +10,8 @@ src/media/
 src/log/**/*
 src/log/
 dist
+**/.env
 
 !src/config/winston.ts
+
+

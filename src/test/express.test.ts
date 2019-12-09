@@ -7,7 +7,7 @@ import cheerio from "cheerio";
 import cookieParser from "cookie-parser";
 import path from "path";
 import dotenv from "dotenv";
-dotenv.config({ path: path.resolve(__dirname, ".test.env") });
+dotenv.config({ path: path.resolve(__dirname, ".env") });
 
 import app from "../app";
 import { Member, LoginLog, Token } from "../models/member";
