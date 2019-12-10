@@ -47,12 +47,12 @@ router.post(
                 password: req.body["signup-pw"],
                 nickName: req.body["signup-nickName"]
             });
+            res.redirect("/");
         } catch (e) {
             logger.warn("FAIL TO CREATE USER");
             logger.warn(e);
             next(e);
         }
-        res.status(200).redirect("/");
     }
 );
 
@@ -289,7 +289,7 @@ router.post("/tl", loginCheck, (req: Request, res: Response) => {
                 }
                 return res.send(translateQuestion.join("\n"));
             } catch (e) {
-                //logger.error(e);
+                // logger.error(e);
                 // logger.info(result);
                 throw new Error(e);
             }
