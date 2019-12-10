@@ -63,6 +63,6 @@ jobs:
                       "connectColor" : "#FF5555",
                       "connectInfo" : [{
                       "title" : "Github action"
-                      "description" : "[SUCCESS](http://github.com/ddudooo/expressTypescript/commit/${{GITHUB_SHA}}"
+                      "description" : "[SUCCESS](http://github.com/ddudooo/expressTypescript/commit/$GITHUB_SHA"
                       }]
                       }'
