@@ -99,6 +99,10 @@ describe("Express test", () => {
             const tokenUtils = require("../utils/tokenUtils");
             sinon.stub(tokenUtils, "verifyJWT").callsFake(() => "accesstoken");
             sinon
+                .stub(tokenUtils, "disableJWT")
+                .resolves([[new Token({ memberIdx: 0 })], 1]);
+
+            sinon
                 .stub(Token, "findAll")
                 .resolves([new Token({ memberIdx: 0 })]);
             sinon.stub(Member, "findByPk").resolves(
