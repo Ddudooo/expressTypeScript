@@ -92,8 +92,8 @@ app.use(
 app.use((req: Request, res: Response, next: NextFunction) => {
     //locale setting middle ware
     try {
-        if (searchLocaleCode(req.query["lang"]) !== "auto") {
-            res.setHeader("Content-language", req.query["lang"]);
+        if (searchLocaleCode(String(req.query["lang"])) !== "auto") {
+            res.setHeader("Content-language", String(req.query["lang"]));
         }
     } catch (err) {
         logger.error(err);
